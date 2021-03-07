@@ -11,7 +11,7 @@ let _ =
   let open In_channel in
   let open Out_channel in
   let rec loop () =
-    printf "(olisp)> %!"; (* %! for flush before readline *)
+    printf "(mal)> %!"; (* %! for flush before readline *)
     input_line_exn stdin
     |> read
     |> eval
