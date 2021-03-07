@@ -1,11 +1,13 @@
 open Base
 open Stdio
 
-let read x = x
+let read s =
+  Reader.read_str s
 
 let eval x = x
 
-let print x = x
+let print typ =
+  Printer.print_str typ
 
 let _ =
   let open In_channel in
