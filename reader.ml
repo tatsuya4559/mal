@@ -33,7 +33,7 @@ let tokenize s =
 exception Cannot_parse
 
 let is_numeric s =
-  try Int.of_string s |> ignore; true
+  try ignore(Int.of_string s); true
   with Failure _ -> false
 
 (** look at the contents of the token and return the appropriate scalar
@@ -51,10 +51,10 @@ let rec read_list t =
   let rec iter t acc_list =
     match peek t with
     | None -> raise Cannot_parse
-    | Some ")" -> next t |> ignore; acc_list (* consume ")" *)
+    | Some ")" -> ignore(next t); acc_list (* consume ")" *)
     | Some _ -> iter t ((read_form t) :: acc_list)
   in
-  next t |> ignore; (* consume "(" *)
+  ignore(next t); (* consume "(" *)
   Type.List (List.rev (iter t []))
 
 (** peek at the first token in the lexer object and switch on the first
