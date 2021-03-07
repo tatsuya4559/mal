@@ -2,7 +2,6 @@ open Base
 open Printf
 
 let rec print_str = function
-  | Type.Eof -> ""
   | Type.Symbol x -> x
   | Type.Int x -> Int.to_string x
   | Type.List lst ->

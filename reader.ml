@@ -40,7 +40,7 @@ let is_numeric s =
     (simple/single) data type value. *)
 let read_atom t =
   match next t with
-  | None -> Type.Eof
+  | None -> assert false
   | Some x ->
       if is_numeric x then Type.Int (Int.of_string x)
       else Type.Symbol x
@@ -50,9 +50,8 @@ let read_atom t =
 let rec read_list t =
   let rec iter t acc_list =
     match peek t with
-    | None -> raise Cannot_parse
     | Some ")" -> ignore(next t); acc_list (* consume ")" *)
-    | Some _ -> iter t ((read_form t) :: acc_list)
+    | _ -> iter t ((read_form t) :: acc_list)
   in
   ignore(next t); (* consume "(" *)
   Type.List (List.rev (iter t []))
@@ -61,14 +60,13 @@ let rec read_list t =
     character of that token. *)
 and read_form t =
   match peek t with
-  | None -> raise End_of_file
+  | None -> raise Cannot_parse (* got EOF while parsing *)
   | Some "(" -> read_list t
   | Some _ -> read_atom t
 
-(** tokenize a given string and then convert to Type.t. *)
+(** tokenize a given string and then convert to Type.t.
+ *  raises Cannot_parse when got EOF while parsing input.*)
 let read_str str =
   let tokens = tokenize str in
   let t = { tokens; curr_position = 0 } in
   read_form t
-
-(* FIXME: とりあえず動くけどエラー時の動きが統一されていない *)
