@@ -48,13 +48,13 @@ let read_atom t =
 (** repeatedly call read_form with the lexer object until it encounters
     a ')' token (if it reach EOF before reading a ')' then that is an error). *)
 let rec read_list t =
-  let rec iter t acc_list =
+  let rec read_element t acc_list =
     match peek t with
     | Some ")" -> ignore(next t); acc_list (* consume ")" *)
-    | _ -> iter t ((read_form t) :: acc_list)
+    | _ -> read_element t ((read_form t) :: acc_list)
   in
   ignore(next t); (* consume "(" *)
-  Type.List (List.rev (iter t []))
+  Type.List (List.rev (read_element t []))
 
 (** peek at the first token in the lexer object and switch on the first
     character of that token. *)
