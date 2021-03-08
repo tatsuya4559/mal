@@ -3,3 +3,4 @@ type t =
   | Int of int
   | Symbol of string
   | Bool of bool
+  | Nil

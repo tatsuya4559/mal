@@ -44,6 +44,7 @@ let read_atom t =
   | None -> assert false
   | Some "true" -> Type.Bool true
   | Some "false" -> Type.Bool false
+  | Some "nil" -> Type.Nil
   | Some x ->
       if is_numeric x then Type.Int (Int.of_string x)
       else Type.Symbol x
