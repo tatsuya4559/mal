@@ -27,8 +27,8 @@ let rex = Pcre.regexp {|[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\
 
 (** tokenize takes a single string and return an array of all the tokens (strings) in it. *)
 let tokenize s =
-  let matches = Pcre.extract_all ~rex s in
-  Array.map matches ~f:(fun x -> x.(1))
+  Pcre.extract_all ~rex s
+  |> Array.map ~f:(fun x -> x.(1))
 
 exception Cannot_parse
 
