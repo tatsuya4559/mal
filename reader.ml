@@ -30,6 +30,8 @@ let rex = Pcre.regexp {|[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\
 let tokenize s =
   Pcre.extract_all ~rex s
   |> Array.map ~f:(fun x -> x.(1))
+  |> Array.filter ~f:(fun x -> not (String.is_prefix ~prefix:";" x)) (* remove comment *)
+  |> fun x -> Array.sub x ~pos:0 ~len:(Array.length x - 1) (* remove trailing empty string *)
 
 exception Cannot_parse
 
@@ -72,6 +74,9 @@ and read_form t =
  *  raises Cannot_parse when got EOF while parsing input.*)
 let read_str str =
   let tokens = tokenize str in
+  (* TODO: to throw a special exception that causes the main loop to
+     simply continue at the beginning of the loop *)
+  if Array.is_empty tokens then Ok Type.Nil else
   let t = { tokens; curr_position = 0 } in
   try Ok (read_form t)
   with Cannot_parse -> Error (sprintf "got EOF while parsing line: %s" str)
