@@ -9,8 +9,8 @@ let read s =
 
 let eval x = x
 
-let print typ =
-  Printer.print_str typ
+let print ast =
+  Printer.print_str ast
 
 let _ =
   let open In_channel in

@@ -1,3 +1,3 @@
 open Base
 
-val read_str : string -> (Type.t, string) Result.t
+val read_str : string -> (Ast.t, string) Result.t
