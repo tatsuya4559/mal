@@ -42,6 +42,8 @@ let is_numeric s =
 let read_atom t =
   match next t with
   | None -> assert false
+  | Some "true" -> Type.Bool true
+  | Some "false" -> Type.Bool false
   | Some x ->
       if is_numeric x then Type.Int (Int.of_string x)
       else Type.Symbol x
