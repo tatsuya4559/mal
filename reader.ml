@@ -1,4 +1,5 @@
 open Base
+open Printf
 
 (** state of lexer *)
 type t = {
@@ -69,4 +70,5 @@ and read_form t =
 let read_str str =
   let tokens = tokenize str in
   let t = { tokens; curr_position = 0 } in
-  read_form t
+  try Ok (read_form t)
+  with Cannot_parse -> Error (sprintf "got EOF while parsing line: %s" str)

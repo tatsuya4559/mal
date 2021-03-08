@@ -2,7 +2,10 @@ open Base
 open Stdio
 
 let read s =
-  Reader.read_str s
+  let open Out_channel in
+  match Reader.read_str s with
+  | Ok x -> x
+  | Error s -> fprintf stderr "%s\n" s; Caml.exit 1
 
 let eval x = x
 
