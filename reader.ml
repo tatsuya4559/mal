@@ -1,5 +1,4 @@
 open Base
-open Printf
 
 (** state of lexer *)
 type t = {
@@ -33,8 +32,6 @@ let tokenize s =
   |> Array.filter ~f:(fun x -> not (String.is_prefix ~prefix:";" x)) (* remove comment *)
   |> fun x -> Array.sub x ~pos:0 ~len:(Array.length x - 1) (* remove trailing empty string *)
 
-exception Cannot_parse
-
 let is_numeric s =
   try ignore(Int.of_string s); true
   with Failure _ -> false
@@ -66,17 +63,15 @@ let rec read_list t =
     character of that token. *)
 and read_form t =
   match peek t with
-  | None -> raise Cannot_parse (* got EOF while parsing *)
+  | None -> failwith "got EOF while parsing"
   | Some "(" -> read_list t
   | Some _ -> read_atom t
 
-(** tokenize a given string and then convert to Ast.t.
- *  raises Cannot_parse when got EOF while parsing input.*)
+(** tokenize a given string and then convert to Ast.t. *)
 let read_str str =
   let tokens = tokenize str in
   (* TODO: to throw a special exception that causes the main loop to
      simply continue at the beginning of the loop *)
-  if Array.is_empty tokens then Ok Ast.Nil else
+  if Array.is_empty tokens then Ast.Nil else
   let t = { tokens; curr_position = 0 } in
-  try Ok (read_form t)
-  with Cannot_parse -> Error (sprintf "got EOF while parsing line: %s" str)
+  read_form t
