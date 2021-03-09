@@ -36,8 +36,9 @@ and define ~env = function
    * first must be symbol and second will be
    * evaluated before associated to the first *)
   | Ast.Symbol sym :: value :: [] ->
-      Env.set env sym (eval ~env value);
-      Ast.Nil
+      let value = (eval ~env value) in
+      Env.set env sym value;
+      value
   | _ -> failwith "syntax: use of 'def!'"
 
 (** let* special form
