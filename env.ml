@@ -5,7 +5,7 @@ type t = (string, Ast.t) List.Assoc.t
 
 let empty = []
 
-let find t key =
+let get t key =
   List.Assoc.find ~equal:String.equal t key
 
 let set t key value =

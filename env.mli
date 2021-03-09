@@ -4,7 +4,7 @@ type t
 (** empty environment *)
 val empty : t
 
-val find : t -> string -> Ast.t option
+val get : t -> string -> Ast.t option
 
 val set : t -> string -> Ast.t -> t
 

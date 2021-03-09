@@ -10,7 +10,7 @@ let apply fn args =
 let rec eval_ast ~env ast =
   match ast with
   | Ast.Symbol x ->
-    (match Env.find env x with
+    (match Env.get env x with
     | None -> failwith (sprintf "%s not found" x)
     | Some x -> x)
   | Ast.List lst ->
