@@ -24,13 +24,13 @@ and eval ~env ast =
   match ast with
   | Ast.List [] -> ast
   | Ast.List (Ast.Symbol "def!" :: tl) ->
-      define ~env tl
+      eval_def ~env tl
   | Ast.List (Ast.Symbol "let*" :: tl) ->
-      let' ~env tl
+      eval_let ~env tl
   | Ast.List (Ast.Symbol "do" :: tl) ->
-      do' ~env tl
+      eval_do ~env tl
   | Ast.List (Ast.Symbol "if" :: tl) ->
-      if' ~env tl
+      eval_if ~env tl
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
@@ -38,7 +38,7 @@ and eval ~env ast =
   | _ -> eval_ast ~env ast
 
 (** def! special form *)
-and define ~env = function
+and eval_def ~env = function
   (* def! requires just two arguments
    * first must be symbol and second will be
    * evaluated before associated to the first *)
@@ -54,7 +54,7 @@ and define ~env = function
  *        bar (- 3 2))
  *    (+ foo bar))
  *)
-and let' ~env = function
+and eval_let ~env = function
   | Ast.List binding_list :: expr :: [] ->
       let enclosed_env = Env.enclose env in
       let rec bind = function
@@ -72,13 +72,13 @@ and let' ~env = function
  * Evaluate all the elements of the list using eval_ast and return the
  * final evaluated element.
  *)
-and do' ~env = function
+and eval_do ~env = function
   | [] -> failwith "syntax: no expr for do"
   | [ast] -> eval_ast ~env ast
-  | hd :: tl -> ignore(eval_ast ~env hd); do' ~env tl
+  | hd :: tl -> ignore(eval_ast ~env hd); eval_do ~env tl
 
 (** if special form *)
-and if' ~env = function
+and eval_if ~env = function
   | condition :: consequence :: alternative ->
       if is_truthy (eval ~env condition) then
         eval ~env consequence
