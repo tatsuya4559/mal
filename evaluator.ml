@@ -30,6 +30,9 @@ and eval ~env ast =
 
 (** define special form *)
 and define ~env = function
+  (* def! requires just two arguments
+   * first must be symbol and second will be
+   * evaluated before associated to the first *)
   | Ast.Symbol sym :: value :: [] ->
       Env.set env sym (eval ~env value);
       Ast.Nil
