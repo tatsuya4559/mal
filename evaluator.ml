@@ -1,10 +1,10 @@
 open Base
 open Printf
 
-let apply operator operands =
-  match operator with
-  | Ast.Fn fn -> fn operands
-  | _ -> failwith "cannot apply"
+let apply fn args =
+  match fn with
+  | Ast.Fn fn -> fn args
+  | _ -> failwith "not a function"
 
 
 let rec eval_ast ~env ast =
@@ -22,6 +22,6 @@ and eval ~env ast =
   | Ast.List [] -> ast
   | Ast.List _ ->
     (match eval_ast ~env ast with
-    | Ast.List (operator :: operands) -> apply operator operands
+    | Ast.List (fn :: args) -> apply fn args
     | _ -> assert false)
   | _ -> eval_ast ~env ast
