@@ -2,13 +2,11 @@ open Base
 open Stdio
 
 let env =
-  let default_fns = [
-    "+", Builtin.add;
-    "-", Builtin.sub;
-    "*", Builtin.mul;
-    "/", Builtin.div;
-  ] in
-  Env.set_all Env.empty default_fns
+  ["+", Builtin.add;
+   "-", Builtin.sub;
+   "*", Builtin.mul;
+   "/", Builtin.div;]
+  |> Env.set_all Env.empty
 
 let read s =
   Reader.read_str s
