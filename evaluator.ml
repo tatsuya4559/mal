@@ -22,13 +22,15 @@ and eval ~env ast =
   | Ast.List [] -> ast
   | Ast.List (Ast.Symbol "def!" :: tl) ->
       define ~env tl
+  | Ast.List (Ast.Symbol "let*" :: tl) ->
+      let' ~env tl
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
     | _ -> assert false)
   | _ -> eval_ast ~env ast
 
-(** define special form *)
+(** def! special form *)
 and define ~env = function
   (* def! requires just two arguments
    * first must be symbol and second will be
@@ -37,3 +39,23 @@ and define ~env = function
       Env.set env sym (eval ~env value);
       Ast.Nil
   | _ -> failwith "syntax: use of 'def!'"
+
+(** let* special form
+ *  syntax:
+ *  (let (foo (+ 1 1)
+ *        bar (- 3 2))
+ *    (+ foo bar))
+ *)
+and let' ~env = function
+  | Ast.List binding_list :: expr :: [] ->
+      let enclosed_env = Env.enclose env in
+      let rec bind = function
+        | [] -> ()
+        | Ast.Symbol first :: second :: rest ->
+            Env.set enclosed_env first (eval ~env:enclosed_env second);
+            bind rest
+        | _ -> failwith "syntax: number of binding list was odd"
+      in
+      bind binding_list;
+      eval ~env:enclosed_env expr
+  | _ -> failwith "syntax: use of 'let*'"
