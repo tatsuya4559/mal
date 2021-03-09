@@ -6,6 +6,9 @@ let apply fn args =
   | Ast.Fn fn -> fn args
   | _ -> failwith "not a function"
 
+let is_truthy = function
+  | Ast.Nil | Ast.Bool false -> false
+  | _ -> true
 
 let rec eval_ast ~env ast =
   match ast with
@@ -26,6 +29,8 @@ and eval ~env ast =
       let' ~env tl
   | Ast.List (Ast.Symbol "do" :: tl) ->
       do' ~env tl
+  | Ast.List (Ast.Symbol "if" :: tl) ->
+      if' ~env tl
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
@@ -71,3 +76,15 @@ and do' ~env = function
   | [] -> failwith "syntax: no expr for do"
   | [ast] -> eval_ast ~env ast
   | hd :: tl -> ignore(eval_ast ~env hd); do' ~env tl
+
+(** if special form *)
+and if' ~env = function
+  | condition :: consequence :: alternative ->
+      if is_truthy (eval ~env condition) then
+        eval ~env consequence
+      else
+        (match alternative with
+        | [] -> Ast.Nil
+        | [ast] -> eval ~env ast
+        | _ -> failwith "syntax: if's alternative is more than 1 expr")
+  | _ -> failwith "syntax: use of 'if'"
