@@ -20,8 +20,17 @@ let rec eval_ast ~env ast =
 and eval ~env ast =
   match ast with
   | Ast.List [] -> ast
+  | Ast.List (Ast.Symbol "def!" :: tl) ->
+      define ~env tl
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
     | _ -> assert false)
   | _ -> eval_ast ~env ast
+
+(** define special form *)
+and define ~env = function
+  | Ast.Symbol sym :: value :: [] ->
+      Env.set env sym (eval ~env value);
+      Ast.Nil
+  | _ -> failwith "syntax: use of 'def!'"
