@@ -4,3 +4,4 @@ type t =
   | Symbol of string
   | Bool of bool
   | Nil
+  | Fn of (t list -> t)
