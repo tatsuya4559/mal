@@ -36,4 +36,6 @@ let _ =
   in
   try
     loop ()
-  with End_of_file -> Caml.exit 0
+  with
+  | End_of_file -> Caml.exit 0
+  | Failure msg -> fprintf stderr "Error: %s\n" msg; Caml.exit 1
