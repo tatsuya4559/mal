@@ -24,6 +24,8 @@ and eval ~env ast =
       define ~env tl
   | Ast.List (Ast.Symbol "let*" :: tl) ->
       let' ~env tl
+  | Ast.List (Ast.Symbol "do" :: tl) ->
+      do' ~env tl
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
@@ -60,3 +62,12 @@ and let' ~env = function
       bind binding_list;
       eval ~env:enclosed_env expr
   | _ -> failwith "syntax: use of 'let*'"
+
+(** do special form
+ * Evaluate all the elements of the list using eval_ast and return the
+ * final evaluated element.
+ *)
+and do' ~env = function
+  | [] -> failwith "syntax: no expr for do"
+  | [ast] -> eval_ast ~env ast
+  | hd :: tl -> ignore(eval_ast ~env hd); do' ~env tl
