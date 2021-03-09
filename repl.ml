@@ -1,17 +1,19 @@
 open Base
 open Stdio
 
-let env =
-  ["+", Builtin.add;
-   "-", Builtin.sub;
-   "*", Builtin.mul;
-   "/", Builtin.div;]
-  |> Env.set_all Env.empty
+let setup_env () =
+  let env = Env.make () in
+  List.iter ~f:(fun (key, value) -> Env.set env key value)
+    ["+", Builtin.add;
+     "-", Builtin.sub;
+     "*", Builtin.mul;
+     "/", Builtin.div;];
+  env
 
 let read s =
   Reader.read_str s
 
-let eval ast =
+let eval ~env ast =
   Evaluator.eval ast ~env
 
 let print ast =
@@ -20,12 +22,13 @@ let print ast =
 let _ =
   let open In_channel in
   let open Out_channel in
+  let env = setup_env () in
   let rec loop () =
     try
       printf "(mal)> %!"; (* %! for flush before readline *)
       input_line_exn stdin
       |> read
-      |> eval
+      |> eval ~env
       |> print
       |> print_endline;
       loop ()
