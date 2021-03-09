@@ -2,13 +2,12 @@ open Base
 open Stdio
 
 let setup_env () =
-  let env = Env.make () in
-  List.iter ~f:(fun (key, value) -> Env.set env key value)
-    ["+", Builtin.add;
-     "-", Builtin.sub;
-     "*", Builtin.mul;
-     "/", Builtin.div;];
-  env
+  Env.make [
+    "+", Builtin.add;
+    "-", Builtin.sub;
+    "*", Builtin.mul;
+    "/", Builtin.div;
+  ]
 
 let read s =
   Reader.read_str s

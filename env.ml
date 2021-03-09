@@ -8,10 +8,6 @@ type t = {
   outer: t option;
 }
 
-let make () = { store = []; outer = None }
-
-let enclose t = { store = []; outer = Some t }
-
 let rec get t key =
   let open Option.Monad_infix in
   match Assoc.find ~equal:String.equal t.store key with
@@ -21,3 +17,10 @@ let rec get t key =
 
 let set t key value =
   t.store <- Assoc.add ~equal:String.equal t.store key value
+
+let make binds =
+  let env = { store = []; outer = None } in
+  List.iter binds ~f:(fun (key, value) -> set env key value);
+  env
+
+let enclose t = { store = []; outer = Some t }
