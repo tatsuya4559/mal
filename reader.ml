@@ -38,6 +38,7 @@ let is_numeric s =
 
 let is_string s =
   String.is_prefix s ~prefix:"\""
+  && String.is_suffix s ~suffix:"\""
 
 (** look at the contents of the token and return the appropriate scalar
     (simple/single) data type value. *)
