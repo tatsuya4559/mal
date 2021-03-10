@@ -62,3 +62,10 @@ let is_list =
     | _ -> Ast.Bool false
   in
   Ast.Fn _is_list
+
+let is_empty_list =
+  let _is_empty_list = function
+    | Ast.List [] :: _ -> Ast.Bool true
+    | _ -> Ast.Bool false
+  in
+  Ast.Fn _is_empty_list

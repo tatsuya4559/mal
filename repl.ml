@@ -9,6 +9,7 @@ let setup_env () =
     "/", Builtin.div;
     "list", Builtin.make_list;
     "list?", Builtin.is_list;
+    "empty?", Builtin.is_empty_list;
   ]
 
 let read s =
