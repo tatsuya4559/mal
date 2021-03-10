@@ -100,14 +100,11 @@ and eval_if ~env = function
 
 (* fn* special form *)
 and eval_fn ~env = function
-  | params :: expr :: [] ->
-      (match params with
-      Ast.List params ->
-        let closure args =
-          let binds = make_binds params args in
-          let enclosed_env = Env.enclose env ~binds in
-          eval ~env:enclosed_env expr
-        in
-        Ast.Fn closure
-      | _ -> failwith "params must be a list")
+  | Ast.List params :: expr :: [] ->
+      let closure args =
+        let binds = make_binds params args in
+        let enclosed_env = Env.enclose env ~binds in
+        eval ~env:enclosed_env expr
+      in
+      Ast.Fn closure
   | _ -> failwith "syntax: use of 'fn*'"
