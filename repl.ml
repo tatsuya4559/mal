@@ -2,15 +2,7 @@ open Base
 open Stdio
 
 let setup_env () =
-  Env.make () ~binds:[
-    "+", Builtin.add;
-    "-", Builtin.sub;
-    "*", Builtin.mul;
-    "/", Builtin.div;
-    "list", Builtin.make_list;
-    "list?", Builtin.is_list;
-    "empty?", Builtin.is_empty_list;
-  ]
+  Env.make () ~binds:Builtin.fns
 
 let read s =
   Reader.read_str s

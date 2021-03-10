@@ -52,10 +52,12 @@ let div =
   in
   Ast.Fn _div
 
+(** take the parameters and return them as a list. *)
 let make_list =
   let _list elements = Ast.List elements in
   Ast.Fn _list
 
+(** return true if the first parameter is a list, false otherwise. *)
 let is_list =
   let _is_list = function
     | [] -> failwith "no arguments"
@@ -64,6 +66,8 @@ let is_list =
   in
   Ast.Fn _is_list
 
+(** treat the first parameter as a list and return true if the list is
+    empty and false if it contains any elements. *)
 let is_empty_list =
   let _is_empty_list = function
     | [] -> failwith "no arguments"
@@ -71,3 +75,13 @@ let is_empty_list =
     | _ -> Ast.Bool false
   in
   Ast.Fn _is_empty_list
+
+let fns = [
+  "+", add;
+  "-", sub;
+  "*", mul;
+  "/", div;
+  "list", make_list;
+  "list?", is_list;
+  "empty?", is_empty_list;
+]
