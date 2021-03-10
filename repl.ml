@@ -13,10 +13,16 @@ let eval ~env ast =
 let print ast =
   Printer.print_str ast
 
+let prelude = [
+  "(def! not (fn* (x) (if x false true)))";
+]
+
 let _ =
   let open In_channel in
   let open Out_channel in
   let env = setup_env () in
+  (* load predefined functions *)
+  List.iter ~f:(fun x -> ignore(read x |> eval ~env)) prelude;
   let rec loop () =
     try
       printf "(mal)> %!"; (* %! for flush before readline *)
