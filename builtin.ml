@@ -58,6 +58,7 @@ let make_list =
 
 let is_list =
   let _is_list = function
+    | [] -> failwith "no arguments"
     | Ast.List _ :: _ -> Ast.Bool true
     | _ -> Ast.Bool false
   in
@@ -65,6 +66,7 @@ let is_list =
 
 let is_empty_list =
   let _is_empty_list = function
+    | [] -> failwith "no arguments"
     | Ast.List [] :: _ -> Ast.Bool true
     | _ -> Ast.Bool false
   in
