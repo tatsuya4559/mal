@@ -85,6 +85,27 @@ let count =
   in
   Ast.Fn _count
 
+(** compare the first two parameters and return true if they are the
+    same type and contain the same value. In the case of equal length lists,
+    each element of the list should be compared for equality and if they are
+    the same return true, otherwise false. *)
+let equal =
+  let rec _equal = function
+    | Ast.Nil :: Ast.Nil :: _ -> true
+    | Ast.Bool a :: Ast.Bool b :: _ -> Bool.(a = b)
+    | Ast.Symbol a :: Ast.Symbol b :: _ -> String.(a = b)
+    | Ast.Int a :: Ast.Int b :: _ -> a = b
+    | Ast.List a :: Ast.List b :: _ ->
+        if List.length a <> List.length b then
+          false
+        else
+          (* cannot raise exn because lengths have been checked *)
+          List.for_all2_exn a b ~f:(fun x y -> _equal [x; y])
+    | Ast.Fn _ :: Ast.Fn _ :: _ -> failwith "cannot compare function value"
+    | _ -> false
+  in
+  Ast.Fn (fun x -> Ast.Bool (_equal x))
+
 let fns = [
   "+", add;
   "-", sub;
@@ -94,4 +115,5 @@ let fns = [
   "list?", is_list;
   "empty?", is_empty_list;
   "count", count;
+  "=", equal;
 ]
