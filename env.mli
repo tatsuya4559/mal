@@ -9,4 +9,4 @@ val set : t -> string -> Ast.t -> unit
 val make : (string * Ast.t) list -> t
 
 (** make a enclosed environment in given one *)
-val enclose : t -> t
+val enclose : ?binds:(string * Ast.t) list -> t -> t

@@ -23,4 +23,7 @@ let make binds =
   List.iter binds ~f:(fun (key, value) -> set env key value);
   env
 
-let enclose t = { store = []; outer = Some t }
+let enclose ?(binds=[]) t =
+  let env = { store = []; outer = Some t } in
+  List.iter binds ~f:(fun (key, value) -> set env key value);
+  env

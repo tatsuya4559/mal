@@ -10,6 +10,13 @@ let is_truthy = function
   | Ast.Nil | Ast.Bool false -> false
   | _ -> true
 
+let make_binds params args =
+  let params = List.map params
+    ~f:(function Ast.Symbol s -> s | _ -> failwith "parameter must be a symbol") in
+  match List.zip params args with
+  | Ok x -> x
+  | Unequal_lengths -> failwith "syntax: too many or less arguments"
+
 let rec eval_ast ~env ast =
   match ast with
   | Ast.Symbol x ->
@@ -31,6 +38,8 @@ and eval ~env ast =
       eval_do ~env tl
   | Ast.List (Ast.Symbol "if" :: tl) ->
       eval_if ~env tl
+  | Ast.List (Ast.Symbol "fn*" :: tl) ->
+      eval_fn ~env tl
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
@@ -88,3 +97,17 @@ and eval_if ~env = function
         | [ast] -> eval ~env ast
         | _ -> failwith "syntax: if's alternative is more than 1 expr")
   | _ -> failwith "syntax: use of 'if'"
+
+(* fn* special form *)
+and eval_fn ~env = function
+  | params :: expr :: [] ->
+      (match params with
+      Ast.List params ->
+        let closure args =
+          let binds = make_binds params args in
+          let enclosed_env = Env.enclose env ~binds in
+          eval ~env:enclosed_env expr
+        in
+        Ast.Fn closure
+      | _ -> failwith "params must be a list")
+  | _ -> failwith "syntax: use of 'fn*'"
