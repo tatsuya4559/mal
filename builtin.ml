@@ -1,4 +1,5 @@
 open Base
+open Stdio
 
 let add =
   let _add ast_list =
@@ -134,11 +135,22 @@ let gte =
   in
   Ast.Fn (fun x -> Ast.Bool (_gte x))
 
+let prn =
+  let open Out_channel in
+  let _prn = function
+    | [] -> failwith "no argument"
+    | hd :: _ ->
+        printf "%s%!" (Printer.print_str hd);
+        Ast.Nil
+  in
+  Ast.Fn _prn
+
 let fns = [
   "+", add;
   "-", sub;
   "*", mul;
   "/", div;
+  "prn", prn;
   "list", make_list;
   "list?", is_list;
   "empty?", is_empty_list;
