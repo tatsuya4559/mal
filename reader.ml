@@ -36,6 +36,9 @@ let is_numeric s =
   try ignore(Int.of_string s); true
   with Failure _ -> false
 
+let is_string s =
+  String.is_prefix s ~prefix:"\""
+
 (** look at the contents of the token and return the appropriate scalar
     (simple/single) data type value. *)
 let read_atom t =
@@ -46,6 +49,7 @@ let read_atom t =
   | Some "nil" -> Ast.Nil
   | Some x ->
       if is_numeric x then Ast.Int (Int.of_string x)
+      else if is_string x then Ast.String x
       else Ast.Symbol x
 
 (** repeatedly call read_form with the lexer object until it encounters
