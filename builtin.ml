@@ -145,12 +145,19 @@ let prn =
   in
   Ast.Fn _prn
 
+let str =
+  let _str ast_list =
+    let s = List.map ast_list ~f:(fun x -> Printer.print_str x)
+    |> String.concat ~sep:" " in
+    Ast.String s
+  in
+  Ast.Fn _str
+
 let fns = [
   "+", add;
   "-", sub;
   "*", mul;
   "/", div;
-  "prn", prn;
   "list", make_list;
   "list?", is_list;
   "empty?", is_empty_list;
@@ -160,4 +167,6 @@ let fns = [
   ">", gt;
   "<=", lte;
   ">=", gte;
+  "prn", prn;
+  "str", str;
 ]
