@@ -2,7 +2,7 @@ open Base
 open Stdio
 
 let setup_env () =
-  Env.make [
+  Env.make () ~binds:[
     "+", Builtin.add;
     "-", Builtin.sub;
     "*", Builtin.mul;

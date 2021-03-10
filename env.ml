@@ -18,7 +18,7 @@ let rec get t key =
 let set t key value =
   t.store <- Assoc.add ~equal:String.equal t.store key value
 
-let make binds =
+let make ?(binds=[]) () =
   let env = { store = []; outer = None } in
   List.iter binds ~f:(fun (key, value) -> set env key value);
   env
