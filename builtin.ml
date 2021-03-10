@@ -51,3 +51,14 @@ let div =
     | _ -> failwith "first argument is not a int"
   in
   Ast.Fn _div
+
+let make_list =
+  let _list elements = Ast.List elements in
+  Ast.Fn _list
+
+let is_list =
+  let _is_list = function
+    | Ast.List _ :: _ -> Ast.Bool true
+    | _ -> Ast.Bool false
+  in
+  Ast.Fn _is_list

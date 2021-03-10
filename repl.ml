@@ -7,6 +7,8 @@ let setup_env () =
     "-", Builtin.sub;
     "*", Builtin.mul;
     "/", Builtin.div;
+    "list", Builtin.make_list;
+    "list?", Builtin.is_list;
   ]
 
 let read s =
