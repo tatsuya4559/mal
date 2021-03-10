@@ -3,7 +3,6 @@ open Stdio
 
 let add =
   let _add ast_list =
-    if (List.length ast_list) = 0 then failwith "first argument is not a int" else
     let sum = List.fold ast_list ~init:0 ~f:(fun acc ast ->
       match ast with
       | Ast.Int x -> acc + x
@@ -29,7 +28,6 @@ let sub =
 
 let mul =
   let _mul ast_list =
-    if (List.length ast_list) = 0 then failwith "first argument is not a int" else
     let product = List.fold ast_list ~init:1 ~f:(fun acc ast ->
       match ast with
       | Ast.Int x -> acc * x
