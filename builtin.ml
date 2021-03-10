@@ -106,6 +106,34 @@ let equal =
   in
   Ast.Fn (fun x -> Ast.Bool (_equal x))
 
+let lt =
+  let _lt = function
+    | Ast.Int a :: Ast.Int b :: _ -> a < b
+    | _ -> false
+  in
+  Ast.Fn (fun x -> Ast.Bool (_lt x))
+
+let gt =
+  let _gt = function
+    | Ast.Int a :: Ast.Int b :: _ -> a > b
+    | _ -> false
+  in
+  Ast.Fn (fun x -> Ast.Bool (_gt x))
+
+let lte =
+  let _lte = function
+    | Ast.Int a :: Ast.Int b :: _ -> a <= b
+    | _ -> false
+  in
+  Ast.Fn (fun x -> Ast.Bool (_lte x))
+
+let gte =
+  let _gte = function
+    | Ast.Int a :: Ast.Int b :: _ -> a >= b
+    | _ -> false
+  in
+  Ast.Fn (fun x -> Ast.Bool (_gte x))
+
 let fns = [
   "+", add;
   "-", sub;
@@ -116,4 +144,8 @@ let fns = [
   "empty?", is_empty_list;
   "count", count;
   "=", equal;
+  "<", lt;
+  ">", gt;
+  "<=", lte;
+  ">=", gte;
 ]
