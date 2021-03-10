@@ -40,6 +40,12 @@ let is_string s =
   String.is_prefix s ~prefix:"\""
   && String.is_suffix s ~suffix:"\""
 
+let unescape s =
+  String.strip ~drop:(fun x -> Char.(x = '"')) s
+  |> String.substr_replace_all ~pattern:{|\"|} ~with_:{|"|}
+  |> String.substr_replace_all ~pattern:{|\n|} ~with_:"\n"
+  |> String.substr_replace_all ~pattern:{|\\|} ~with_:{|\|}
+
 (** look at the contents of the token and return the appropriate scalar
     (simple/single) data type value. *)
 let read_atom t =
@@ -49,7 +55,7 @@ let read_atom t =
   | Some "false" -> Ast.Bool false
   | Some "nil" -> Ast.Nil
   | Some x when is_numeric x -> Ast.Int (Int.of_string x)
-  | Some x when is_string x -> Ast.String x
+  | Some x when is_string x -> Ast.String (unescape x)
   | Some x -> Ast.Symbol x
 
 (** repeatedly call read_form with the lexer object until it encounters
