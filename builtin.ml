@@ -94,7 +94,7 @@ let equal =
   let rec _equal = function
     | Ast.Nil :: Ast.Nil :: _ -> true
     | Ast.Bool a :: Ast.Bool b :: _ -> Bool.(a = b)
-    | Ast.Symbol a :: Ast.Symbol b :: _ -> String.(a = b)
+    | Ast.String a :: Ast.String b :: _ -> String.(a = b)
     | Ast.Int a :: Ast.Int b :: _ -> a = b
     | Ast.List a :: Ast.List b :: _ ->
         if List.length a <> List.length b then
