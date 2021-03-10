@@ -27,6 +27,16 @@ let rec eval_ast ~env ast =
       Ast.List (List.map lst ~f:(eval ~env))
   | _ -> ast
 
+(* I don't have to impl tail call optimization because I'm using OCaml.
+ * Test:
+ *   > (def! sum-to (fn* (n) (if (= n 0) 0 (+ n (sum-to (- n 1))))))
+ *   > (sum-to 10000000)
+ *   > Fatal error: exception Stack overflow
+ *
+ *   > (def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))
+ *   > (sum2 10000000 0)
+ *   > 50000005000000
+ *)
 and eval ~env ast =
   match ast with
   | Ast.List [] -> ast
