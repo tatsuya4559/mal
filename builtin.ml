@@ -76,6 +76,15 @@ let is_empty_list =
   in
   Ast.Fn _is_empty_list
 
+(** treat the first parameter as a list and return the number of
+    elements that it contains. *)
+let count =
+  let _count = function
+    | Ast.List lst :: _ -> Ast.Int (List.length lst)
+    | _ -> failwith "count takes a list as argument"
+  in
+  Ast.Fn _count
+
 let fns = [
   "+", add;
   "-", sub;
@@ -84,4 +93,5 @@ let fns = [
   "list", make_list;
   "list?", is_list;
   "empty?", is_empty_list;
+  "count", count;
 ]
