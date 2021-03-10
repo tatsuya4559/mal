@@ -137,11 +137,11 @@ let gte =
 
 let prn =
   let open Out_channel in
-  let _prn = function
-    | [] -> failwith "no argument"
-    | hd :: _ ->
-        printf "%s%!" (Printer.print_str hd);
-        Ast.Nil
+  let _prn ast_list =
+    List.map ast_list ~f:(fun x -> Printer.print_str x)
+    |> String.concat ~sep:" "
+    |> printf "%s%!";
+    Ast.Nil
   in
   Ast.Fn _prn
 
