@@ -98,7 +98,7 @@ and eval_if ~env = function
         | _ -> failwith "syntax: if's alternative is more than 1 expr")
   | _ -> failwith "syntax: use of 'if'"
 
-(* fn* special form *)
+(** fn* special form *)
 and eval_fn ~env = function
   | Ast.List params :: expr :: [] ->
       let closure args =
