@@ -80,8 +80,6 @@ and read_form t =
 (** tokenize a given string and then convert to Ast.t. *)
 let read_str str =
   let tokens = tokenize str in
-  (* TODO: to throw a special exception that causes the main loop to
-     simply continue at the beginning of the loop *)
   if Array.is_empty tokens then Ast.Nil else
   let t = { tokens; curr_position = 0 } in
   read_form t
