@@ -47,10 +47,9 @@ let read_atom t =
   | Some "true" -> Ast.Bool true
   | Some "false" -> Ast.Bool false
   | Some "nil" -> Ast.Nil
-  | Some x ->
-      if is_numeric x then Ast.Int (Int.of_string x)
-      else if is_string x then Ast.String x
-      else Ast.Symbol x
+  | Some x when is_numeric x -> Ast.Int (Int.of_string x)
+  | Some x when is_string x -> Ast.String x
+  | Some x -> Ast.Symbol x
 
 (** repeatedly call read_form with the lexer object until it encounters
     a ')' token (if it reach EOF before reading a ')' then that is an error). *)
