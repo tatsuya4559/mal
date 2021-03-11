@@ -48,19 +48,21 @@ let unescape s =
 
 (** look at the contents of the token and return the appropriate scalar
     (simple/single) data type value. *)
-let read_atom t =
+let rec read_atom t =
   match next t with
   | None -> assert false
   | Some "true" -> Ast.Bool true
   | Some "false" -> Ast.Bool false
   | Some "nil" -> Ast.Nil
+  (* a reader macro @ which will serve as a short form for deref. *)
+  | Some "@" -> Ast.List [Ast.Symbol "deref"; read_form t]
   | Some x when is_numeric x -> Ast.Int (Int.of_string x)
   | Some x when is_string x -> Ast.String (unescape x)
   | Some x -> Ast.Symbol x
 
 (** repeatedly call read_form with the lexer object until it encounters
     a ')' token (if it reach EOF before reading a ')' then that is an error). *)
-let rec read_list t =
+and read_list t =
   let rec read_element t acc_list =
     match peek t with
     | Some ")" -> ignore(next t); acc_list (* consume ")" *)
