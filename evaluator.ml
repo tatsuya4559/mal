@@ -93,8 +93,8 @@ and eval_let ~env = function
  *)
 and eval_do ~env = function
   | [] -> failwith "syntax: no expr for do"
-  | [ast] -> eval_ast ~env ast
-  | hd :: tl -> ignore(eval_ast ~env hd); eval_do ~env tl
+  | [ast] -> eval ~env ast
+  | hd :: tl -> ignore(eval ~env hd); eval_do ~env tl
 
 (** if special form *)
 and eval_if ~env = function
