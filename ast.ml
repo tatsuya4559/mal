@@ -6,3 +6,4 @@ type t =
   | Bool of bool
   | Nil
   | Fn of (t list -> t)
+  | Atom of t ref

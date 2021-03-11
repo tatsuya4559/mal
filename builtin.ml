@@ -180,6 +180,55 @@ let slurp =
   in
   Ast.Fn _slurp
 
+(** Takes a Mal value and returns a new atom which points to that Mal value. *)
+let atom =
+  let _atom = function
+    | [ast] -> Ast.Atom (ref ast)
+    | _ -> failwith "wrong number of arguments to 'atom'"
+  in
+  Ast.Fn _atom
+
+(** Takes an argument and returns true if the argument is an atom. *)
+let is_atom =
+  let _is_atom = function
+    | [Ast.Atom _] -> Ast.Bool true
+    | [_] -> Ast.Bool false
+    | _ -> failwith "wrong number of arguments to 'atom'"
+  in
+  Ast.Fn _is_atom
+
+(** Takes an atom argument and returns the Mal value referenced by this atom. *)
+let deref =
+  let _deref = function
+    | [Ast.Atom x] -> !x
+    | [_] -> failwith "argument must be atom"
+    | _ -> failwith "wrong number of arguments to 'atom'"
+  in
+  Ast.Fn _deref
+
+(** Takes an atom and a Mal value; the atom is modified to refer to the
+    given Mal value. The Mal value is returned. *)
+let reset =
+  let _reset = function
+    | Ast.Atom x :: value :: [] -> x := value; value
+    | _ :: _ :: [] -> failwith "first argument must be atom"
+    | _ -> failwith "wrong number of arguments to 'atom'"
+  in
+  Ast.Fn _reset
+
+(** Takes an atom, a function, and zero or more function arguments. The
+    atom's value is modified to the result of applying the function with the
+    atom's value as the first argument and the optionally given function
+    arguments as the rest of the arguments. *)
+let swap =
+  let _swap = function
+    | Ast.Atom x :: Ast.Fn fn :: args ->
+        x := fn (!x :: args);
+        !x
+    | _ -> failwith "swap error"
+  in
+  Ast.Fn _swap
+
 let fns = [
   "+", add;
   "-", sub;
@@ -199,6 +248,11 @@ let fns = [
   "str", str;
   "read-string", read_string;
   "slurp", slurp;
+  "atom", atom;
+  "atom?", is_atom;
+  "deref", deref;
+  "reset!", reset;
+  "swap!", swap;
 ]
 
 let make_eval env =

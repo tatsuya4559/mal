@@ -17,4 +17,4 @@ let rec print_str ?(readably=true) = function
       List.map lst ~f:(fun x -> print_str x)
       |> String.concat ~sep:" "
       |> sprintf "(%s)"
-
+  | Ast.Atom ast -> print_str !ast
