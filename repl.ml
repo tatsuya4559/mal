@@ -17,7 +17,8 @@ let print ast =
   Printer.print_str ast
 
 let prelude = [
-  "(def! not (fn* (x) (if x false true)))";
+  {|(def! load-file (fn* (f) (eval (read-string (str "(do " (slurp f) "\nnil)")))))|};
+  {|(load-file "prelude.mal")|};
 ]
 
 let _ =
