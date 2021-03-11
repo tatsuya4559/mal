@@ -151,6 +151,25 @@ let str =
   in
   Ast.Fn _str
 
+(** this function just exposes the read_str function from the reader. *)
+let read_string =
+  let _read_string = function
+    | Ast.String s :: _ -> Reader.read_str s
+    | _ -> failwith "argument must be type of string"
+  in
+  Ast.Fn _read_string
+
+(** this function takes a file name (string) and returns the contents of
+    the file as a string. *)
+let slurp =
+  let _slurp = function
+    | Ast.String filename :: _ ->
+        let open In_channel in
+        Ast.String (read_all filename)
+    | _ -> failwith "argument must be type of string"
+  in
+  Ast.Fn _slurp
+
 let fns = [
   "+", add;
   "-", sub;
@@ -167,4 +186,6 @@ let fns = [
   ">=", gte;
   "prn", prn;
   "str", str;
+  "read-string", read_string;
+  "slurp", slurp;
 ]
