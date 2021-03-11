@@ -143,6 +143,16 @@ let prn =
   in
   Ast.Fn _prn
 
+let println =
+  let open Out_channel in
+  let _println ast_list =
+    List.map ast_list ~f:(fun x -> Printer.print_str ~readably:false x)
+    |> String.concat ~sep:" "
+    |> printf "%s%!";
+    Ast.Nil
+  in
+  Ast.Fn _println
+
 let str =
   let _str ast_list =
     let s = List.map ast_list ~f:(fun x -> Printer.print_str x)
@@ -185,6 +195,7 @@ let fns = [
   "<=", lte;
   ">=", gte;
   "prn", prn;
+  "println", println;
   "str", str;
   "read-string", read_string;
   "slurp", slurp;
