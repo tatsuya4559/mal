@@ -225,7 +225,7 @@ let swap =
     | Ast.Atom x :: Ast.Fn fn :: args ->
         x := fn (!x :: args);
         !x
-    | _ -> failwith "swap error"
+    | _ -> failwith "the first arg must be an atom and the second must be a function"
   in
   Ast.Fn _swap
 
