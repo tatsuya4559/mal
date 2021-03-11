@@ -2,7 +2,10 @@ open Base
 open Stdio
 
 let setup_env () =
-  Env.make () ~binds:Builtin.fns
+  let env = Env.make () ~binds:Builtin.fns in
+  (* use env to define eval function *)
+  Env.set env "eval" (Builtin.make_eval env);
+  env
 
 let read s =
   Reader.read_str s

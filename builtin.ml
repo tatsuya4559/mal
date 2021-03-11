@@ -189,3 +189,10 @@ let fns = [
   "read-string", read_string;
   "slurp", slurp;
 ]
+
+let make_eval env =
+  let _eval = function
+    | ast :: []  -> Evaluator.eval ast ~env
+    | _ -> failwith "wrong number of arguments to 'eval'";
+  in
+  Ast.Fn _eval
