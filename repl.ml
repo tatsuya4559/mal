@@ -26,12 +26,10 @@ let setup_env () =
 
 let rep ~env x =
   let open Out_channel in
-  x
-  |> read
-  |> eval ~env
-  |> print
-  |> print_endline;
-  ()
+  try
+    x |> read |> eval ~env |> print |> print_endline;
+    ()
+  with Failure msg -> fprintf stderr "Error: %s\n%!" msg; ()
 
 let set_argv env argv =
   let argv = Array.to_list argv
@@ -46,11 +44,9 @@ let _ =
   let open Out_channel in
   let env = setup_env () in
   let rec loop () =
-    try
-      printf "(mal)> %!"; (* %! for flush before readline *)
-      input_line_exn stdin |> rep ~env;
-      loop ()
-    with Failure msg -> fprintf stderr "Error: %s\n%!" msg; loop()
+    printf "(mal)> %!"; (* %! for flush before readline *)
+    input_line_exn stdin |> rep ~env;
+    loop ()
   in
   try
     let argv = Sys.get_argv () in
