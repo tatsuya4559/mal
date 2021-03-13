@@ -33,6 +33,14 @@ let rep ~env x =
   |> print_endline;
   ()
 
+let set_argv env argv =
+  let argv = Array.to_list argv
+    |> List.map ~f:(fun x -> Ast.String x)
+  in
+  Env.set env "*ARGV*" (Ast.List argv);
+  ()
+
+(* main *)
 let _ =
   let open In_channel in
   let open Out_channel in
@@ -46,10 +54,13 @@ let _ =
   in
   try
     let argv = Sys.get_argv () in
-    if Array.length argv > 1 then
+    if Array.length argv > 1 then begin
       let filename = argv.(1) in
+      set_argv env (Array.subo argv ~pos:2);
       sprintf {|(load-file "%s")|} filename
       |> rep ~env;
-    else
+    end else begin
+      set_argv env [||];
       loop ()
+    end
   with End_of_file -> Caml.exit 0
