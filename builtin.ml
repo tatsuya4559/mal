@@ -240,6 +240,17 @@ let cons =
   in
   Ast.Fn _cons
 
+(** this functions takes 0 or more lists as parameters and returns a new
+    list that is a concatenation of all the list parameters. *)
+let concat =
+  let rec _concat = function
+    | [] -> Ast.List []
+    | (Ast.List _) as l :: [] -> l
+    | Ast.List first :: Ast.List second :: rest ->
+        _concat @@ Ast.List (first @ second) :: rest
+    | _ -> failwith "argument must be list"
+  in
+  Ast.Fn _concat
 
 let fns = [
   "+", add;
@@ -266,6 +277,7 @@ let fns = [
   "reset!", reset;
   "swap!", swap;
   "cons", cons;
+  "concat", concat;
 ]
 
 let make_eval env =
