@@ -50,6 +50,8 @@ and eval ~env ast =
       eval_if ~env tl
   | Ast.List (Ast.Symbol "fn*" :: tl) ->
       eval_fn ~env tl
+  | Ast.List (Ast.Symbol "quote" :: ast :: _) ->
+      ast (* just return argument *)
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
