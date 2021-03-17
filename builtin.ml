@@ -229,6 +229,18 @@ let swap =
   in
   Ast.Fn _swap
 
+(** this function takes a list as its second parameter and returns a new
+    list that has the first argument prepended to it. *)
+let cons =
+  let _cons = function
+    | x :: Ast.List lst :: [] ->
+        Ast.List (x :: lst)
+    | _ :: _ :: [] -> failwith "the second argument must be a list"
+    | _ -> failwith "wrong number of arguments to 'cons'"
+  in
+  Ast.Fn _cons
+
+
 let fns = [
   "+", add;
   "-", sub;
@@ -253,6 +265,7 @@ let fns = [
   "deref", deref;
   "reset!", reset;
   "swap!", swap;
+  "cons", cons;
 ]
 
 let make_eval env =
