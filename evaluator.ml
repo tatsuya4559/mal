@@ -17,6 +17,20 @@ let make_binds params args =
   | Ok x -> x
   | Unequal_lengths -> failwith "syntax: too many or less arguments"
 
+let rec quasiquote = function
+  | Ast.List lst ->
+    let rec loop = function
+      | [] -> Ast.List []
+      | Ast.Symbol "unquote" :: second :: _ -> second
+      | Ast.List (Ast.Symbol "splice-unquote" :: second :: _) :: rest ->
+          Ast.List [Ast.Symbol "concat"; second; (loop rest)]
+      | first :: rest ->
+          Ast.List [Ast.Symbol "cons"; (quasiquote first); (loop rest)]
+    in
+    loop lst
+  | (Ast.Symbol _) as ast-> Ast.List [Ast.Symbol "quote"; ast]
+  | _ as ast -> ast
+
 let rec eval_ast ~env ast =
   match ast with
   | Ast.Symbol x ->
@@ -52,6 +66,10 @@ and eval ~env ast =
       eval_fn ~env tl
   | Ast.List (Ast.Symbol "quote" :: ast :: _) ->
       ast (* just return argument *)
+  | Ast.List (Ast.Symbol "quasiquoteexpand" :: ast :: _) ->
+      quasiquote ast
+  | Ast.List (Ast.Symbol "quasiquote" :: ast :: _) ->
+      eval ~env (quasiquote ast)
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
