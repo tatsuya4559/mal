@@ -56,6 +56,14 @@ let rec read_atom t =
   | Some "nil" -> Ast.Nil
   (* a reader macro @ which will serve as a short form for deref. *)
   | Some "@" -> Ast.List [Ast.Symbol "deref"; read_form t]
+  (* a reader macro ' which will serve as a short form for quote. *)
+  | Some "'" -> Ast.List [Ast.Symbol "quote"; read_form t]
+  (* a reader macro ` which will serve as a short form for quasiquote. *)
+  | Some "`" -> Ast.List [Ast.Symbol "quasiquote"; read_form t]
+  (* a reader macro ~ which will serve as a short form for unquote. *)
+  | Some "~" -> Ast.List [Ast.Symbol "unquote"; read_form t]
+  (* a reader macro ~@ which will serve as a short form for splice-unquote. *)
+  | Some "~@" -> Ast.List [Ast.Symbol "splice-unquote"; read_form t]
   | Some x when is_numeric x -> Ast.Int (Int.of_string x)
   | Some x when is_string x -> Ast.String (unescape x)
   | Some x -> Ast.Symbol x
