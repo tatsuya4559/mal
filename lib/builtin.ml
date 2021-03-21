@@ -1,93 +1,125 @@
 open Core
 
-let add =
-  let _add ast_list =
-    let sum = List.fold ast_list ~init:0 ~f:(fun acc ast ->
+let add ast_list =
+  let sum = List.fold ast_list ~init:0 ~f:(fun acc ast ->
+    match ast with
+    | Ast.Int x -> acc + x
+    | _ -> failwith "not int" )
+  in
+  Ast.Int sum
+
+let%test "(= (+ 1 2) 3)" =
+  match add [Ast.Int 1; Ast.Int 2] with
+  | Ast.Int 3 -> true
+  | _ -> false
+
+let%test "(= (+) 0)" =
+  match add [] with
+  | Ast.Int 0 -> true
+  | _ -> false
+
+let sub = function
+  | [] -> failwith "no operand"
+  | Ast.Int init :: tl ->
+    let diff = List.fold tl ~init ~f:(fun acc ast ->
       match ast with
-      | Ast.Int x -> acc + x
+      | Ast.Int x -> acc - x
       | _ -> failwith "not int" )
     in
-    Ast.Int sum
-  in
-  Ast.Fn _add
+    Ast.Int diff
+  | _ -> failwith "first argument is not a int"
 
-let sub =
-  let _sub = function
-    | [] -> failwith "no operand"
-    | Ast.Int init :: tl ->
-      let diff = List.fold tl ~init ~f:(fun acc ast ->
-        match ast with
-        | Ast.Int x -> acc - x
-        | _ -> failwith "not int" )
-      in
-      Ast.Int diff
-    | _ -> failwith "first argument is not a int"
-  in
-  Ast.Fn _sub
+let%test "(= (- 5 2) 3)" =
+  match sub [Ast.Int 5; Ast.Int 2] with
+  | Ast.Int 3 -> true
+  | _ -> false
 
-let mul =
-  let _mul ast_list =
-    let product = List.fold ast_list ~init:1 ~f:(fun acc ast ->
+let mul ast_list =
+  let product = List.fold ast_list ~init:1 ~f:(fun acc ast ->
+    match ast with
+    | Ast.Int x -> acc * x
+    | _ -> failwith "not int" )
+  in
+  Ast.Int product
+
+let%test "(= (* 2 3) 6)" =
+  match mul [Ast.Int 2; Ast.Int 3] with
+  | Ast.Int 6 -> true
+  | _ -> false
+
+let%test "(= (*) 1)" =
+  match mul [] with
+  | Ast.Int 1 -> true
+  | _ -> false
+
+let div = function
+  | [] -> failwith "no operand"
+  | Ast.Int init :: tl ->
+    let quotient = List.fold tl ~init ~f:(fun acc ast ->
       match ast with
-      | Ast.Int x -> acc * x
+      | Ast.Int x -> acc / x
       | _ -> failwith "not int" )
     in
-    Ast.Int product
-  in
-  Ast.Fn _mul
+    Ast.Int quotient
+  | _ -> failwith "first argument is not a int"
 
-let div =
-  let _div = function
-    | [] -> failwith "no operand"
-    | Ast.Int init :: tl ->
-      let quotient = List.fold tl ~init ~f:(fun acc ast ->
-        match ast with
-        | Ast.Int x -> acc / x
-        | _ -> failwith "not int" )
-      in
-      Ast.Int quotient
-    | _ -> failwith "first argument is not a int"
-  in
-  Ast.Fn _div
+let%test "(= (/ 6 3) 2)" =
+  match div [Ast.Int 6; Ast.Int 3] with
+  | Ast.Int 2 -> true
+  | _ -> false
 
 (** take the parameters and return them as a list. *)
-let make_list =
-  let _list elements = Ast.List elements in
-  Ast.Fn _list
+let make_list elements = Ast.List elements
 
 (** return true if the first parameter is a list, false otherwise. *)
-let is_list =
-  let _is_list = function
-    | [] -> failwith "no arguments"
-    | Ast.List _ :: _ -> Ast.Bool true
-    | _ -> Ast.Bool false
-  in
-  Ast.Fn _is_list
+let is_list = function
+  | [] -> failwith "no arguments"
+  | Ast.List _ :: _ -> Ast.Bool true
+  | _ -> Ast.Bool false
+
+let%test "'() is a list" =
+  match is_list [Ast.List []] with
+  | Ast.Bool true -> true
+  | _ -> false
+
+let%test "3 is not a list" =
+  match is_list [Ast.Int 3] with
+  | Ast.Bool false -> true
+  | _ -> false
 
 (** treat the first parameter as a list and return true if the list is
     empty and false if it contains any elements. *)
-let is_empty_list =
-  let _is_empty_list = function
-    | [] -> failwith "no arguments"
-    | Ast.List [] :: _ -> Ast.Bool true
-    | _ -> Ast.Bool false
-  in
-  Ast.Fn _is_empty_list
+let is_empty_list = function
+  | [] -> failwith "no arguments"
+  | Ast.List [] :: _ -> Ast.Bool true
+  | _ -> Ast.Bool false
+
+let%test "'() is an empty list" =
+  match is_empty_list [Ast.List []] with
+  | Ast.Bool true -> true
+  | _ -> false
+
+let%test "'(3) is not an empty list" =
+  match is_empty_list [Ast.List [Ast.Int 3]] with
+  | Ast.Bool false -> true
+  | _ -> false
 
 (** treat the first parameter as a list and return the number of
     elements that it contains. *)
-let count =
-  let _count = function
-    | Ast.List lst :: _ -> Ast.Int (List.length lst)
-    | _ -> failwith "count takes a list as argument"
-  in
-  Ast.Fn _count
+let count = function
+  | Ast.List lst :: _ -> Ast.Int (List.length lst)
+  | _ -> failwith "count takes a list as argument"
+
+let%test "(count '(1 2)) is 2" =
+  match count [Ast.List [Ast.Int 1; Ast.Int 2]] with
+  | Ast.Int 2 -> true
+  | _ -> false
 
 (** compare the first two parameters and return true if they are the
     same type and contain the same value. In the case of equal length lists,
     each element of the list should be compared for equality and if they are
     the same return true, otherwise false. *)
-let equal =
+let equal args =
   let rec _equal = function
     | Ast.Nil :: Ast.Nil :: _ -> true
     | Ast.Bool a :: Ast.Bool b :: _ -> Bool.(a = b)
@@ -102,181 +134,190 @@ let equal =
     | Ast.Fn _ :: Ast.Fn _ :: _ -> failwith "cannot compare function value"
     | _ -> false
   in
-  Ast.Fn (fun x -> Ast.Bool (_equal x))
+  Ast.Bool (_equal args)
 
-let lt =
+let lt args =
   let _lt = function
     | Ast.Int a :: Ast.Int b :: _ -> a < b
     | _ -> failwith "cannot compare"
   in
-  Ast.Fn (fun x -> Ast.Bool (_lt x))
+  Ast.Bool (_lt args)
 
-let gt =
+let gt args =
   let _gt = function
     | Ast.Int a :: Ast.Int b :: _ -> a > b
     | _ -> failwith "cannot compare"
   in
-  Ast.Fn (fun x -> Ast.Bool (_gt x))
+  Ast.Bool (_gt args)
 
-let lte =
+let lte args =
   let _lte = function
     | Ast.Int a :: Ast.Int b :: _ -> a <= b
     | _ -> failwith "cannot compare"
   in
-  Ast.Fn (fun x -> Ast.Bool (_lte x))
+  Ast.Bool (_lte args)
 
-let gte =
+let gte args =
   let _gte = function
     | Ast.Int a :: Ast.Int b :: _ -> a >= b
     | _ -> failwith "cannot compare"
   in
-  Ast.Fn (fun x -> Ast.Bool (_gte x))
+  Ast.Bool (_gte args)
 
-let prn =
+let%test_module "equality and comparison test" = (module struct
+
+  let is_true = function
+    | Ast.Bool true -> true
+    | _ -> false
+
+  let is_false = function
+    | Ast.Bool false -> true
+    | _ -> false
+
+  let%test "nil = nil" = is_true @@ equal [Ast.Nil; Ast.Nil]
+  let%test "true = true" = is_true @@ equal [Ast.Bool true; Ast.Bool true]
+  let%test "false = false" = is_true @@ equal [Ast.Bool false; Ast.Bool false]
+  let%test "true <> false" = is_false @@ equal [Ast.Bool true; Ast.Bool false]
+  let%test "\"foo\" = \"foo\"" = is_true @@ equal [Ast.String "foo"; Ast.String "foo"]
+  let%test "\"foo\" <> \"bar\"" = is_false @@ equal [Ast.String "foo"; Ast.String "bar"]
+  let%test "3 = 3" = is_true @@ equal [Ast.Int 3; Ast.Int 3]
+  let%test "3 <> 4" = is_false @@ equal [Ast.Int 3; Ast.Int 4]
+  let%test "'(1 2) = '(1 2)" =
+    is_true @@ equal [
+      Ast.List [Ast.Int 1; Ast.Int 2];
+      Ast.List [Ast.Int 1; Ast.Int 2];
+    ]
+  let%test "'(1 2) <> '(1 3)" =
+    is_false @@ equal [
+      Ast.List [Ast.Int 1; Ast.Int 2];
+      Ast.List [Ast.Int 1; Ast.Int 3];
+    ]
+  let%test "3 <> false" = is_false @@ equal [Ast.Int 3; Ast.Bool false]
+
+  let%test "3 < 4" = is_true @@ lt [Ast.Int 3; Ast.Int 4]
+  let%test "4 < 4" = is_false @@ lt [Ast.Int 4; Ast.Int 4]
+  let%test "4 < 3" = is_false @@ lt [Ast.Int 4; Ast.Int 3]
+  let%test "4 > 3" = is_true @@ gt [Ast.Int 4; Ast.Int 3]
+  let%test "4 > 4" = is_false @@ gt [Ast.Int 4; Ast.Int 4]
+  let%test "3 > 4" = is_false @@ gt [Ast.Int 3; Ast.Int 4]
+  let%test "3 <= 4" = is_true @@ lte [Ast.Int 3; Ast.Int 4]
+  let%test "4 <= 4" = is_true @@ lte [Ast.Int 4; Ast.Int 4]
+  let%test "4 <= 3" = is_false @@ lte [Ast.Int 4; Ast.Int 3]
+  let%test "4 >= 3" = is_true @@ gte [Ast.Int 4; Ast.Int 3]
+  let%test "4 >= 4" = is_true @@ gte [Ast.Int 4; Ast.Int 4]
+  let%test "3 >= 4" = is_false @@ gte [Ast.Int 3; Ast.Int 4]
+
+end)
+
+let prn ast_list =
   let open Out_channel in
-  let _prn ast_list =
-    List.map ast_list ~f:(fun x -> Printer.print_str x)
-    |> String.concat ~sep:" "
-    |> printf "%s%!";
-    Ast.Nil
-  in
-  Ast.Fn _prn
+  List.map ast_list ~f:(fun x -> Printer.print_str x)
+  |> String.concat ~sep:" "
+  |> printf "%s%!";
+  Ast.Nil
 
-let println =
+let println ast_list =
   let open Out_channel in
-  let _println ast_list =
-    List.map ast_list ~f:(fun x -> Printer.print_str ~readably:false x)
-    |> String.concat ~sep:" "
-    |> printf "%s%!";
-    Ast.Nil
-  in
-  Ast.Fn _println
+  List.map ast_list ~f:(fun x -> Printer.print_str ~readably:false x)
+  |> String.concat ~sep:" "
+  |> printf "%s%!";
+  Ast.Nil
 
-let str =
-  let _str ast_list =
-    let s = List.map ast_list ~f:(fun x -> Printer.print_str x)
-    |> String.concat ~sep:" " in
-    Ast.String s
-  in
-  Ast.Fn _str
+let str ast_list =
+  let s = List.map ast_list ~f:(fun x -> Printer.print_str x)
+  |> String.concat ~sep:" " in
+  Ast.String s
 
 (** this function just exposes the read_str function from the reader. *)
-let read_string =
-  let _read_string = function
-    | Ast.String s :: _ -> Reader.read_str s
-    | _ -> failwith "argument must be type of string"
-  in
-  Ast.Fn _read_string
+let read_string = function
+  | Ast.String s :: _ -> Reader.read_str s
+  | _ -> failwith "argument must be type of string"
 
 (** this function takes a file name (string) and returns the contents of
     the file as a string. *)
-let slurp =
-  let _slurp = function
-    | Ast.String filename :: _ ->
-        let open In_channel in
-        Ast.String (read_all filename)
-    | _ -> failwith "argument must be type of string"
-  in
-  Ast.Fn _slurp
+let slurp = function
+  | Ast.String filename :: _ ->
+      let open In_channel in
+      Ast.String (read_all filename)
+  | _ -> failwith "argument must be type of string"
 
 (** Takes a Mal value and returns a new atom which points to that Mal value. *)
-let atom =
-  let _atom = function
-    | [ast] -> Ast.Atom (ref ast)
-    | _ -> failwith "wrong number of arguments to 'atom'"
-  in
-  Ast.Fn _atom
+let atom = function
+  | [ast] -> Ast.Atom (ref ast)
+  | _ -> failwith "wrong number of arguments to 'atom'"
 
 (** Takes an argument and returns true if the argument is an atom. *)
-let is_atom =
-  let _is_atom = function
-    | [Ast.Atom _] -> Ast.Bool true
-    | [_] -> Ast.Bool false
-    | _ -> failwith "wrong number of arguments to 'atom'"
-  in
-  Ast.Fn _is_atom
+let is_atom = function
+  | [Ast.Atom _] -> Ast.Bool true
+  | [_] -> Ast.Bool false
+  | _ -> failwith "wrong number of arguments to 'atom'"
 
 (** Takes an atom argument and returns the Mal value referenced by this atom. *)
-let deref =
-  let _deref = function
-    | [Ast.Atom x] -> !x
-    | [_] -> failwith "argument must be atom"
-    | _ -> failwith "wrong number of arguments to 'atom'"
-  in
-  Ast.Fn _deref
+let deref = function
+  | [Ast.Atom x] -> !x
+  | [_] -> failwith "argument must be atom"
+  | _ -> failwith "wrong number of arguments to 'atom'"
 
 (** Takes an atom and a Mal value; the atom is modified to refer to the
     given Mal value. The Mal value is returned. *)
-let reset =
-  let _reset = function
-    | Ast.Atom x :: value :: [] -> x := value; value
-    | _ :: _ :: [] -> failwith "first argument must be atom"
-    | _ -> failwith "wrong number of arguments to 'atom'"
-  in
-  Ast.Fn _reset
+let reset = function
+  | Ast.Atom x :: value :: [] -> x := value; value
+  | _ :: _ :: [] -> failwith "first argument must be atom"
+  | _ -> failwith "wrong number of arguments to 'atom'"
 
 (** Takes an atom, a function, and zero or more function arguments. The
     atom's value is modified to the result of applying the function with the
     atom's value as the first argument and the optionally given function
     arguments as the rest of the arguments. *)
-let swap =
-  let _swap = function
-    | Ast.Atom x :: Ast.Fn fn :: args ->
-        x := fn (!x :: args);
-        !x
-    | _ -> failwith "the first arg must be an atom and the second must be a function"
-  in
-  Ast.Fn _swap
+let swap = function
+  | Ast.Atom x :: Ast.Fn fn :: args ->
+      x := fn (!x :: args);
+      !x
+  | _ -> failwith "the first arg must be an atom and the second must be a function"
 
 (** this function takes a list as its second parameter and returns a new
     list that has the first argument prepended to it. *)
-let cons =
-  let _cons = function
-    | x :: Ast.List lst :: [] ->
-        Ast.List (x :: lst)
-    | _ :: _ :: [] -> failwith "the second argument must be a list"
-    | _ -> failwith "wrong number of arguments to 'cons'"
-  in
-  Ast.Fn _cons
+let cons = function
+  | x :: Ast.List lst :: [] ->
+      Ast.List (x :: lst)
+  | _ :: _ :: [] -> failwith "the second argument must be a list"
+  | _ -> failwith "wrong number of arguments to 'cons'"
 
 (** this functions takes 0 or more lists as parameters and returns a new
     list that is a concatenation of all the list parameters. *)
-let concat =
-  let rec _concat = function
-    | [] -> Ast.List []
-    | (Ast.List _) as l :: [] -> l
-    | Ast.List first :: Ast.List second :: rest ->
-        _concat @@ Ast.List (first @ second) :: rest
-    | _ -> failwith "argument must be list"
-  in
-  Ast.Fn _concat
+let rec concat = function
+  | [] -> Ast.List []
+  | (Ast.List _) as l :: [] -> l
+  | Ast.List first :: Ast.List second :: rest ->
+      concat @@ Ast.List (first @ second) :: rest
+  | _ -> failwith "argument must be list"
 
 let fns = [
-  "+", add;
-  "-", sub;
-  "*", mul;
-  "/", div;
-  "list", make_list;
-  "list?", is_list;
-  "empty?", is_empty_list;
-  "count", count;
-  "=", equal;
-  "<", lt;
-  ">", gt;
-  "<=", lte;
-  ">=", gte;
-  "prn", prn;
-  "println", println;
-  "str", str;
-  "read-string", read_string;
-  "slurp", slurp;
-  "atom", atom;
-  "atom?", is_atom;
-  "deref", deref;
-  "reset!", reset;
-  "swap!", swap;
-  "cons", cons;
-  "concat", concat;
+  "+", Ast.Fn add;
+  "-", Ast.Fn sub;
+  "*", Ast.Fn mul;
+  "/", Ast.Fn div;
+  "list", Ast.Fn make_list;
+  "list?", Ast.Fn is_list;
+  "empty?", Ast.Fn is_empty_list;
+  "count", Ast.Fn count;
+  "=", Ast.Fn equal;
+  "<", Ast.Fn lt;
+  ">", Ast.Fn gt;
+  "<=", Ast.Fn lte;
+  ">=", Ast.Fn gte;
+  "prn", Ast.Fn prn;
+  "println", Ast.Fn println;
+  "str", Ast.Fn str;
+  "read-string", Ast.Fn read_string;
+  "slurp", Ast.Fn slurp;
+  "atom", Ast.Fn atom;
+  "atom?", Ast.Fn is_atom;
+  "deref", Ast.Fn deref;
+  "reset!", Ast.Fn reset;
+  "swap!", Ast.Fn swap;
+  "cons", Ast.Fn cons;
+  "concat", Ast.Fn concat;
 ]
 
 let make_eval env =
