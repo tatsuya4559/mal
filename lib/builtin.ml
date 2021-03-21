@@ -1,5 +1,4 @@
-open Base
-open Stdio
+open Core
 
 let add =
   let _add ast_list =

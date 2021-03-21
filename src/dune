@@ -1,3 +1,0 @@
-(executable
-  (name repl)
-  (libraries base stdio pcre))

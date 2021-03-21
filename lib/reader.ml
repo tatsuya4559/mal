@@ -1,4 +1,4 @@
-open Base
+open Core
 
 (** state of lexer *)
 type t = {

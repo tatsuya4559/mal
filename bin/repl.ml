@@ -1,6 +1,5 @@
-open Base
-open Stdio
-open Printf
+open Core
+open Mal
 
 let read s =
   Reader.read_str s
