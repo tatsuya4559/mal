@@ -6,6 +6,12 @@ let escape s =
   |> String.substr_replace_all ~pattern:"\n" ~with_:{|\n|}
   |> String.substr_replace_all ~pattern:{|"|} ~with_:{|\"|}
 
+let%test _ =
+  let got = escape {|backslash:\,linefeed:
+,doublequote:"|}
+  in
+  String.(got = {|backslash:\\,linefeed:\n,doublequote:\"|})
+
 let rec print_str ?(readably=true) = function
   | Ast.Symbol x -> x
   | Ast.String x -> if readably then x else escape x
