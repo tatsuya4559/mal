@@ -36,9 +36,17 @@ let is_numeric s =
   try ignore(Int.of_string s); true
   with Failure _ -> false
 
+let%test _ = is_numeric "12"
+let%test _ = not (is_numeric "foo")
+
 let is_string s =
   String.is_prefix s ~prefix:"\""
   && String.is_suffix s ~suffix:"\""
+
+let%test _ = is_string {|"foo"|}
+let%test _ = not (is_string {|"foo|})
+let%test _ = not (is_string {|foo"|})
+let%test _ = not (is_string {|foo|})
 
 let unescape s =
   String.strip ~drop:(fun x -> Char.(x = '"')) s
