@@ -283,6 +283,11 @@ let cons = function
   | _ :: _ :: [] -> failwith "the second argument must be a list"
   | _ -> failwith "wrong number of arguments to 'cons'"
 
+let%test "(cons 1 '())" =
+  match cons [Ast.Int 1; Ast.List []] with
+  | Ast.List [Ast.Int 1] -> true
+  | _ -> false
+
 (** this functions takes 0 or more lists as parameters and returns a new
     list that is a concatenation of all the list parameters. *)
 let rec concat = function
@@ -291,6 +296,13 @@ let rec concat = function
   | Ast.List first :: Ast.List second :: rest ->
       concat @@ Ast.List (first @ second) :: rest
   | _ -> failwith "argument must be list"
+
+let%test "(concat '(1 2) '(3 4))" =
+  let lst1 = Ast.List [Ast.Int 1; Ast.Int 2] in
+  let lst2 = Ast.List [Ast.Int 3; Ast.Int 4] in
+  match concat [lst1; lst2] with
+  | Ast.List [Ast.Int 1; Ast.Int 2; Ast.Int 3; Ast.Int 4] -> true
+  | _ -> false
 
 let fns = [
   "+", Ast.Fn add;
