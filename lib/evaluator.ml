@@ -3,7 +3,7 @@ open Printf
 
 let apply fn args =
   match fn with
-  | Ast.Fn fn -> fn args
+  | Ast.Fn { body; _ } -> body args
   | _ -> failwith "not a function"
 
 let is_truthy = function
@@ -136,5 +136,5 @@ and eval_fn ~env = function
         let enclosed_env = Env.enclose env ~binds in
         eval ~env:enclosed_env expr
       in
-      Ast.Fn closure
+      Ast.fn closure
   | _ -> failwith "syntax: use of 'fn*'"

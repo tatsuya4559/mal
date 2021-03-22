@@ -5,5 +5,7 @@ type t =
   | Symbol of string
   | Bool of bool
   | Nil
-  | Fn of (t list -> t)
+  | Fn of { is_macro: bool; body: (t list -> t) }
   | Atom of t ref
+
+let fn body = Fn { is_macro = false; body }

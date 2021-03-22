@@ -170,8 +170,8 @@ let reset = function
     atom's value as the first argument and the optionally given function
     arguments as the rest of the arguments. *)
 let swap = function
-  | Ast.Atom x :: Ast.Fn fn :: args ->
-      x := fn (!x :: args);
+  | Ast.Atom x :: Ast.Fn { body; _ } :: args ->
+      x := body (!x :: args);
       !x
   | _ -> failwith "the first arg must be an atom and the second must be a function"
 
@@ -193,31 +193,31 @@ let rec concat = function
   | _ -> failwith "argument must be list"
 
 let fns = [
-  "+", Ast.Fn add;
-  "-", Ast.Fn sub;
-  "*", Ast.Fn mul;
-  "/", Ast.Fn div;
-  "list", Ast.Fn make_list;
-  "list?", Ast.Fn is_list;
-  "empty?", Ast.Fn is_empty_list;
-  "count", Ast.Fn count;
-  "=", Ast.Fn equal;
-  "<", Ast.Fn lt;
-  ">", Ast.Fn gt;
-  "<=", Ast.Fn lte;
-  ">=", Ast.Fn gte;
-  "prn", Ast.Fn prn;
-  "println", Ast.Fn println;
-  "str", Ast.Fn str;
-  "read-string", Ast.Fn read_string;
-  "slurp", Ast.Fn slurp;
-  "atom", Ast.Fn atom;
-  "atom?", Ast.Fn is_atom;
-  "deref", Ast.Fn deref;
-  "reset!", Ast.Fn reset;
-  "swap!", Ast.Fn swap;
-  "cons", Ast.Fn cons;
-  "concat", Ast.Fn concat;
+  "+", Ast.fn add;
+  "-", Ast.fn sub;
+  "*", Ast.fn mul;
+  "/", Ast.fn div;
+  "list", Ast.fn make_list;
+  "list?", Ast.fn is_list;
+  "empty?", Ast.fn is_empty_list;
+  "count", Ast.fn count;
+  "=", Ast.fn equal;
+  "<", Ast.fn lt;
+  ">", Ast.fn gt;
+  "<=", Ast.fn lte;
+  ">=", Ast.fn gte;
+  "prn", Ast.fn prn;
+  "println", Ast.fn println;
+  "str", Ast.fn str;
+  "read-string", Ast.fn read_string;
+  "slurp", Ast.fn slurp;
+  "atom", Ast.fn atom;
+  "atom?", Ast.fn is_atom;
+  "deref", Ast.fn deref;
+  "reset!", Ast.fn reset;
+  "swap!", Ast.fn swap;
+  "cons", Ast.fn cons;
+  "concat", Ast.fn concat;
 ]
 
 let make_eval env =
@@ -225,7 +225,7 @@ let make_eval env =
     | ast :: []  -> Evaluator.eval ast ~env
     | _ -> failwith "wrong number of arguments to 'eval'";
   in
-  Ast.Fn _eval
+  Ast.fn _eval
 
 let%test_module "test builtin functions" = (module struct
 
