@@ -56,6 +56,8 @@ and eval ~env ast =
   | Ast.List [] -> ast
   | Ast.List (Ast.Symbol "def!" :: tl) ->
       eval_def ~env tl
+  | Ast.List (Ast.Symbol "defmacro!" :: tl) ->
+      eval_defmacro ~env tl
   | Ast.List (Ast.Symbol "let*" :: tl) ->
       eval_let ~env tl
   | Ast.List (Ast.Symbol "do" :: tl) ->
@@ -86,6 +88,20 @@ and eval_def ~env = function
       Env.set env sym value;
       value
   | _ -> failwith "syntax: use of 'def!'"
+
+(** This is very similar to the def! form, but before the evaluated
+    value (mal function) is set in the environment, the is_macro attribute
+    should be set to true. *)
+and eval_defmacro ~env = function
+  | Ast.Symbol sym :: value :: [] ->
+      let value =
+        match eval ~env value with
+        | Ast.Fn fn -> Ast.Fn { fn with is_macro = true }
+        | _ as x -> x
+      in
+      Env.set env sym value;
+      value
+  | _ -> failwith "syntax: use of 'defmacro!'"
 
 (** let* special form
  *  syntax:
