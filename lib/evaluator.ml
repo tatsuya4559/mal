@@ -31,6 +31,17 @@ let rec quasiquote = function
   | (Ast.Symbol _) as ast-> Ast.List [Ast.Symbol "quote"; ast]
   | _ as ast -> ast
 
+(** This function takes arguments ast and env. It returns true if ast
+    is a list that contains a symbol as the first element and that symbol
+    refers to a function in the env environment and that function has the
+    is_macro attribute set to true. Otherwise, it returns false. *)
+let is_macro_call ~env = function
+  | Ast.Symbol sym :: _ ->
+      (match Env.get env sym with
+      | Some Ast.Fn { is_macro; _ } -> is_macro
+      | _ -> false)
+  | _ -> false
+
 let rec eval_ast ~env ast =
   match ast with
   | Ast.Symbol x ->
@@ -154,3 +165,27 @@ and eval_fn ~env = function
       in
       Ast.fn closure
   | _ -> failwith "syntax: use of 'fn*'"
+
+
+let%test_module "test evaluator" = (module struct
+
+  (* is_macro_call *)
+  let%test "when foo is macro" =
+    let binds =
+      ["foo", Ast.Fn { is_macro = true; body = (fun _ -> Ast.Nil) }]
+    in
+    let env = Env.make ~binds () in
+    is_macro_call ~env [Ast.Symbol "foo"]
+
+  let%test "when foo is not macro" =
+    let binds =
+      ["foo", Ast.Fn { is_macro = false; body = (fun _ -> Ast.Nil) }]
+    in
+    let env = Env.make ~binds () in
+    not @@ is_macro_call ~env [Ast.Symbol "foo"]
+
+  let%test "when foo is not defined" =
+    let env = Env.make () in
+    not @@ is_macro_call ~env [Ast.Symbol "foo"]
+
+end)
