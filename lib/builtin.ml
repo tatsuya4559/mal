@@ -38,19 +38,6 @@ let div = function
     Ast.Int quotient
   | _ -> failwith "first argument is not a int"
 
-let%test_module "calculation test" = (module struct
-  let is_int i = function
-    | Ast.Int x -> x = i
-    | _ -> false
-
-  let%test "(= (+ 1 2) 3)" = add [Ast.Int 1; Ast.Int 2] |> is_int 3
-  let%test "(= (+) 0)" = add [] |> is_int 0
-  let%test "(= (- 5 2) 3)" = sub [Ast.Int 5; Ast.Int 2] |> is_int 3
-  let%test "(= (* 2 3) 6)" = mul [Ast.Int 2; Ast.Int 3] |> is_int 6
-  let%test "(= (*) 1)" = mul [] |> is_int 1
-  let%test "(= (/ 6 3) 2)" = div [Ast.Int 6; Ast.Int 3] |> is_int 2
-end)
-
 (** take the parameters and return them as a list. *)
 let make_list elements = Ast.List elements
 
@@ -60,16 +47,6 @@ let is_list = function
   | Ast.List _ :: _ -> Ast.Bool true
   | _ -> Ast.Bool false
 
-let%test "'() is a list" =
-  match is_list [Ast.List []] with
-  | Ast.Bool true -> true
-  | _ -> false
-
-let%test "3 is not a list" =
-  match is_list [Ast.Int 3] with
-  | Ast.Bool false -> true
-  | _ -> false
-
 (** treat the first parameter as a list and return true if the list is
     empty and false if it contains any elements. *)
 let is_empty_list = function
@@ -77,26 +54,11 @@ let is_empty_list = function
   | Ast.List [] :: _ -> Ast.Bool true
   | _ -> Ast.Bool false
 
-let%test "'() is an empty list" =
-  match is_empty_list [Ast.List []] with
-  | Ast.Bool true -> true
-  | _ -> false
-
-let%test "'(3) is not an empty list" =
-  match is_empty_list [Ast.List [Ast.Int 3]] with
-  | Ast.Bool false -> true
-  | _ -> false
-
 (** treat the first parameter as a list and return the number of
     elements that it contains. *)
 let count = function
   | Ast.List lst :: _ -> Ast.Int (List.length lst)
   | _ -> failwith "count takes a list as argument"
-
-let%test "(count '(1 2)) is 2" =
-  match count [Ast.List [Ast.Int 1; Ast.Int 2]] with
-  | Ast.Int 2 -> true
-  | _ -> false
 
 (** compare the first two parameters and return true if they are the
     same type and contain the same value. In the case of equal length lists,
@@ -146,51 +108,6 @@ let gte args =
     | _ -> failwith "cannot compare"
   in
   Ast.Bool (_gte args)
-
-let%test_module "equality and comparison test" = (module struct
-
-  let is_true = function
-    | Ast.Bool true -> true
-    | _ -> false
-
-  let is_false = function
-    | Ast.Bool false -> true
-    | _ -> false
-
-  let%test "nil = nil" = equal [Ast.Nil; Ast.Nil] |> is_true
-  let%test "true = true" = equal [Ast.Bool true; Ast.Bool true] |> is_true
-  let%test "false = false" = equal [Ast.Bool false; Ast.Bool false] |> is_true
-  let%test "true <> false" = equal [Ast.Bool true; Ast.Bool false] |> is_false
-  let%test "\"foo\" = \"foo\"" = equal [Ast.String "foo"; Ast.String "foo"] |> is_true
-  let%test "\"foo\" <> \"bar\"" = equal [Ast.String "foo"; Ast.String "bar"] |> is_false
-  let%test "3 = 3" = equal [Ast.Int 3; Ast.Int 3] |> is_true
-  let%test "3 <> 4" = equal [Ast.Int 3; Ast.Int 4] |> is_false
-  let%test "'(1 2) = '(1 2)" =
-    equal [
-      Ast.List [Ast.Int 1; Ast.Int 2];
-      Ast.List [Ast.Int 1; Ast.Int 2];
-    ] |> is_true
-  let%test "'(1 2) <> '(1 3)" =
-    equal [
-      Ast.List [Ast.Int 1; Ast.Int 2];
-      Ast.List [Ast.Int 1; Ast.Int 3];
-    ] |> is_false
-  let%test "3 <> false" = equal [Ast.Int 3; Ast.Bool false] |> is_false
-
-  let%test "3 < 4" = lt [Ast.Int 3; Ast.Int 4] |> is_true
-  let%test "4 < 4" = lt [Ast.Int 4; Ast.Int 4] |> is_false
-  let%test "4 < 3" = lt [Ast.Int 4; Ast.Int 3] |> is_false
-  let%test "4 > 3" = gt [Ast.Int 4; Ast.Int 3] |> is_true
-  let%test "4 > 4" = gt [Ast.Int 4; Ast.Int 4] |> is_false
-  let%test "3 > 4" = gt [Ast.Int 3; Ast.Int 4] |> is_false
-  let%test "3 <= 4" = lte [Ast.Int 3; Ast.Int 4] |> is_true
-  let%test "4 <= 4" = lte [Ast.Int 4; Ast.Int 4] |> is_true
-  let%test "4 <= 3" = lte [Ast.Int 4; Ast.Int 3] |> is_false
-  let%test "4 >= 3" = gte [Ast.Int 4; Ast.Int 3] |> is_true
-  let%test "4 >= 4" = gte [Ast.Int 4; Ast.Int 4] |> is_true
-  let%test "3 >= 4" = gte [Ast.Int 3; Ast.Int 4] |> is_false
-
-end)
 
 let prn ast_list =
   let open Out_channel in
@@ -266,11 +183,6 @@ let cons = function
   | _ :: _ :: [] -> failwith "the second argument must be a list"
   | _ -> failwith "wrong number of arguments to 'cons'"
 
-let%test "(cons 1 '())" =
-  match cons [Ast.Int 1; Ast.List []] with
-  | Ast.List [Ast.Int 1] -> true
-  | _ -> false
-
 (** this functions takes 0 or more lists as parameters and returns a new
     list that is a concatenation of all the list parameters. *)
 let rec concat = function
@@ -279,13 +191,6 @@ let rec concat = function
   | Ast.List first :: Ast.List second :: rest ->
       concat @@ Ast.List (first @ second) :: rest
   | _ -> failwith "argument must be list"
-
-let%test "(concat '(1 2) '(3 4))" =
-  let lst1 = Ast.List [Ast.Int 1; Ast.Int 2] in
-  let lst2 = Ast.List [Ast.Int 3; Ast.Int 4] in
-  match concat [lst1; lst2] with
-  | Ast.List [Ast.Int 1; Ast.Int 2; Ast.Int 3; Ast.Int 4] -> true
-  | _ -> false
 
 let fns = [
   "+", Ast.Fn add;
@@ -321,3 +226,83 @@ let make_eval env =
     | _ -> failwith "wrong number of arguments to 'eval'";
   in
   Ast.Fn _eval
+
+let%test_module "test builtin functions" = (module struct
+
+  (* helpers *)
+  let is_int i = function
+    | Ast.Int x -> x = i
+    | _ -> false
+
+  let is_true = function
+    | Ast.Bool true -> true
+    | _ -> false
+
+  let is_false = function
+    | Ast.Bool false -> true
+    | _ -> false
+
+  (* calculations *)
+  let%test "(= (+ 1 2) 3)" = add [Ast.Int 1; Ast.Int 2] |> is_int 3
+  let%test "(= (+) 0)" = add [] |> is_int 0
+  let%test "(= (- 5 2) 3)" = sub [Ast.Int 5; Ast.Int 2] |> is_int 3
+  let%test "(= (* 2 3) 6)" = mul [Ast.Int 2; Ast.Int 3] |> is_int 6
+  let%test "(= (*) 1)" = mul [] |> is_int 1
+  let%test "(= (/ 6 3) 2)" = div [Ast.Int 6; Ast.Int 3] |> is_int 2
+
+  (* list *)
+  let%test "'() is a list" = is_list [Ast.List []] |> is_true
+  let%test "3 is not a list" = is_list [Ast.Int 3] |> is_false
+  let%test "'() is empty" = is_empty_list [Ast.List []] |> is_true
+  let%test "'(3) is not empty" = is_empty_list [Ast.List [Ast.Int 3]] |> is_false
+  let%test "(count '(1 2)) is 2" = count [Ast.List [Ast.Int 1; Ast.Int 2]] |> is_int 2
+
+  (* equality *)
+  let%test "nil = nil" = equal [Ast.Nil; Ast.Nil] |> is_true
+  let%test "true = true" = equal [Ast.Bool true; Ast.Bool true] |> is_true
+  let%test "false = false" = equal [Ast.Bool false; Ast.Bool false] |> is_true
+  let%test "true <> false" = equal [Ast.Bool true; Ast.Bool false] |> is_false
+  let%test "\"foo\" = \"foo\"" = equal [Ast.String "foo"; Ast.String "foo"] |> is_true
+  let%test "\"foo\" <> \"bar\"" = equal [Ast.String "foo"; Ast.String "bar"] |> is_false
+  let%test "3 = 3" = equal [Ast.Int 3; Ast.Int 3] |> is_true
+  let%test "3 <> 4" = equal [Ast.Int 3; Ast.Int 4] |> is_false
+  let%test "'(1 2) = '(1 2)" =
+    equal [
+      Ast.List [Ast.Int 1; Ast.Int 2];
+      Ast.List [Ast.Int 1; Ast.Int 2];
+    ] |> is_true
+  let%test "'(1 2) <> '(1 3)" =
+    equal [
+      Ast.List [Ast.Int 1; Ast.Int 2];
+      Ast.List [Ast.Int 1; Ast.Int 3];
+    ] |> is_false
+  let%test "3 <> false" = equal [Ast.Int 3; Ast.Bool false] |> is_false
+
+  (* comparison *)
+  let%test "3 < 4" = lt [Ast.Int 3; Ast.Int 4] |> is_true
+  let%test "4 < 4" = lt [Ast.Int 4; Ast.Int 4] |> is_false
+  let%test "4 < 3" = lt [Ast.Int 4; Ast.Int 3] |> is_false
+  let%test "4 > 3" = gt [Ast.Int 4; Ast.Int 3] |> is_true
+  let%test "4 > 4" = gt [Ast.Int 4; Ast.Int 4] |> is_false
+  let%test "3 > 4" = gt [Ast.Int 3; Ast.Int 4] |> is_false
+  let%test "3 <= 4" = lte [Ast.Int 3; Ast.Int 4] |> is_true
+  let%test "4 <= 4" = lte [Ast.Int 4; Ast.Int 4] |> is_true
+  let%test "4 <= 3" = lte [Ast.Int 4; Ast.Int 3] |> is_false
+  let%test "4 >= 3" = gte [Ast.Int 4; Ast.Int 3] |> is_true
+  let%test "4 >= 4" = gte [Ast.Int 4; Ast.Int 4] |> is_true
+  let%test "3 >= 4" = gte [Ast.Int 3; Ast.Int 4] |> is_false
+
+  let%test "(cons 1 '())" =
+    match cons [Ast.Int 1; Ast.List []] with
+    | Ast.List [Ast.Int 1] -> true
+    | _ -> false
+
+  let%test "(concat '(1 2) '(3 4))" =
+    let lst1 = Ast.List [Ast.Int 1; Ast.Int 2] in
+    let lst2 = Ast.List [Ast.Int 3; Ast.Int 4] in
+    match concat [lst1; lst2] with
+    | Ast.List [Ast.Int 1; Ast.Int 2; Ast.Int 3; Ast.Int 4] -> true
+    | _ -> false
+
+end)
+
