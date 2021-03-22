@@ -174,38 +174,38 @@ let%test_module "equality and comparison test" = (module struct
     | Ast.Bool false -> true
     | _ -> false
 
-  let%test "nil = nil" = is_true @@ equal [Ast.Nil; Ast.Nil]
-  let%test "true = true" = is_true @@ equal [Ast.Bool true; Ast.Bool true]
-  let%test "false = false" = is_true @@ equal [Ast.Bool false; Ast.Bool false]
-  let%test "true <> false" = is_false @@ equal [Ast.Bool true; Ast.Bool false]
-  let%test "\"foo\" = \"foo\"" = is_true @@ equal [Ast.String "foo"; Ast.String "foo"]
-  let%test "\"foo\" <> \"bar\"" = is_false @@ equal [Ast.String "foo"; Ast.String "bar"]
-  let%test "3 = 3" = is_true @@ equal [Ast.Int 3; Ast.Int 3]
-  let%test "3 <> 4" = is_false @@ equal [Ast.Int 3; Ast.Int 4]
+  let%test "nil = nil" = equal [Ast.Nil; Ast.Nil] |> is_true
+  let%test "true = true" = equal [Ast.Bool true; Ast.Bool true] |> is_true
+  let%test "false = false" = equal [Ast.Bool false; Ast.Bool false] |> is_true
+  let%test "true <> false" = equal [Ast.Bool true; Ast.Bool false] |> is_false
+  let%test "\"foo\" = \"foo\"" = equal [Ast.String "foo"; Ast.String "foo"] |> is_true
+  let%test "\"foo\" <> \"bar\"" = equal [Ast.String "foo"; Ast.String "bar"] |> is_false
+  let%test "3 = 3" = equal [Ast.Int 3; Ast.Int 3] |> is_true
+  let%test "3 <> 4" = equal [Ast.Int 3; Ast.Int 4] |> is_false
   let%test "'(1 2) = '(1 2)" =
-    is_true @@ equal [
+    equal [
       Ast.List [Ast.Int 1; Ast.Int 2];
       Ast.List [Ast.Int 1; Ast.Int 2];
-    ]
+    ] |> is_true
   let%test "'(1 2) <> '(1 3)" =
-    is_false @@ equal [
+    equal [
       Ast.List [Ast.Int 1; Ast.Int 2];
       Ast.List [Ast.Int 1; Ast.Int 3];
-    ]
-  let%test "3 <> false" = is_false @@ equal [Ast.Int 3; Ast.Bool false]
+    ] |> is_false
+  let%test "3 <> false" = equal [Ast.Int 3; Ast.Bool false] |> is_false
 
-  let%test "3 < 4" = is_true @@ lt [Ast.Int 3; Ast.Int 4]
-  let%test "4 < 4" = is_false @@ lt [Ast.Int 4; Ast.Int 4]
-  let%test "4 < 3" = is_false @@ lt [Ast.Int 4; Ast.Int 3]
-  let%test "4 > 3" = is_true @@ gt [Ast.Int 4; Ast.Int 3]
-  let%test "4 > 4" = is_false @@ gt [Ast.Int 4; Ast.Int 4]
-  let%test "3 > 4" = is_false @@ gt [Ast.Int 3; Ast.Int 4]
-  let%test "3 <= 4" = is_true @@ lte [Ast.Int 3; Ast.Int 4]
-  let%test "4 <= 4" = is_true @@ lte [Ast.Int 4; Ast.Int 4]
-  let%test "4 <= 3" = is_false @@ lte [Ast.Int 4; Ast.Int 3]
-  let%test "4 >= 3" = is_true @@ gte [Ast.Int 4; Ast.Int 3]
-  let%test "4 >= 4" = is_true @@ gte [Ast.Int 4; Ast.Int 4]
-  let%test "3 >= 4" = is_false @@ gte [Ast.Int 3; Ast.Int 4]
+  let%test "3 < 4" = lt [Ast.Int 3; Ast.Int 4] |> is_true
+  let%test "4 < 4" = lt [Ast.Int 4; Ast.Int 4] |> is_false
+  let%test "4 < 3" = lt [Ast.Int 4; Ast.Int 3] |> is_false
+  let%test "4 > 3" = gt [Ast.Int 4; Ast.Int 3] |> is_true
+  let%test "4 > 4" = gt [Ast.Int 4; Ast.Int 4] |> is_false
+  let%test "3 > 4" = gt [Ast.Int 3; Ast.Int 4] |> is_false
+  let%test "3 <= 4" = lte [Ast.Int 3; Ast.Int 4] |> is_true
+  let%test "4 <= 4" = lte [Ast.Int 4; Ast.Int 4] |> is_true
+  let%test "4 <= 3" = lte [Ast.Int 4; Ast.Int 3] |> is_false
+  let%test "4 >= 3" = gte [Ast.Int 4; Ast.Int 3] |> is_true
+  let%test "4 >= 4" = gte [Ast.Int 4; Ast.Int 4] |> is_true
+  let%test "3 >= 4" = gte [Ast.Int 3; Ast.Int 4] |> is_false
 
 end)
 
