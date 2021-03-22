@@ -8,16 +8,6 @@ let add ast_list =
   in
   Ast.Int sum
 
-let%test "(= (+ 1 2) 3)" =
-  match add [Ast.Int 1; Ast.Int 2] with
-  | Ast.Int 3 -> true
-  | _ -> false
-
-let%test "(= (+) 0)" =
-  match add [] with
-  | Ast.Int 0 -> true
-  | _ -> false
-
 let sub = function
   | [] -> failwith "no operand"
   | Ast.Int init :: tl ->
@@ -29,11 +19,6 @@ let sub = function
     Ast.Int diff
   | _ -> failwith "first argument is not a int"
 
-let%test "(= (- 5 2) 3)" =
-  match sub [Ast.Int 5; Ast.Int 2] with
-  | Ast.Int 3 -> true
-  | _ -> false
-
 let mul ast_list =
   let product = List.fold ast_list ~init:1 ~f:(fun acc ast ->
     match ast with
@@ -41,16 +26,6 @@ let mul ast_list =
     | _ -> failwith "not int" )
   in
   Ast.Int product
-
-let%test "(= (* 2 3) 6)" =
-  match mul [Ast.Int 2; Ast.Int 3] with
-  | Ast.Int 6 -> true
-  | _ -> false
-
-let%test "(= (*) 1)" =
-  match mul [] with
-  | Ast.Int 1 -> true
-  | _ -> false
 
 let div = function
   | [] -> failwith "no operand"
@@ -63,10 +38,18 @@ let div = function
     Ast.Int quotient
   | _ -> failwith "first argument is not a int"
 
-let%test "(= (/ 6 3) 2)" =
-  match div [Ast.Int 6; Ast.Int 3] with
-  | Ast.Int 2 -> true
-  | _ -> false
+let%test_module "calculation test" = (module struct
+  let is_int i = function
+    | Ast.Int x -> x = i
+    | _ -> false
+
+  let%test "(= (+ 1 2) 3)" = add [Ast.Int 1; Ast.Int 2] |> is_int 3
+  let%test "(= (+) 0)" = add [] |> is_int 0
+  let%test "(= (- 5 2) 3)" = sub [Ast.Int 5; Ast.Int 2] |> is_int 3
+  let%test "(= (* 2 3) 6)" = mul [Ast.Int 2; Ast.Int 3] |> is_int 6
+  let%test "(= (*) 1)" = mul [] |> is_int 1
+  let%test "(= (/ 6 3) 2)" = div [Ast.Int 6; Ast.Int 3] |> is_int 2
+end)
 
 (** take the parameters and return them as a list. *)
 let make_list elements = Ast.List elements
