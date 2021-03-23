@@ -11,11 +11,19 @@ let is_truthy = function
   | _ -> true
 
 let make_binds params args =
-  let params = List.map params
-    ~f:(function Ast.Symbol s -> s | _ -> failwith "parameter must be a symbol") in
-  match List.zip params args with
-  | Ok x -> x
-  | Unequal_lengths -> failwith "syntax: too many or less arguments"
+  let rec loop acc params args =
+    match (params, args) with
+    | [], [] -> acc
+    | [], _ | _, [] -> failwith "syntax: too many or less arguments"
+    (* if a "&" symbol is encountered in the binds list, the next symbol
+        in the binds list after the "&" is bound to the rest of the exprs list
+        that has not been bound yet. *)
+    | (Ast.Symbol "&") :: (Ast.Symbol s) :: _, args -> (s, Ast.List args) :: acc
+    | (Ast.Symbol s) :: rest_params, arg :: rest_args ->
+        loop ((s, arg) :: acc) rest_params rest_args
+    | _, _ -> failwith "syntax: parameter must be symbol"
+  in
+  List.rev @@ loop [] params args
 
 let rec quasiquote = function
   | Ast.List lst ->
@@ -212,5 +220,19 @@ let%test_module "test evaluator" = (module struct
   let%test "when foo is not defined" =
     let env = Env.make () in
     not @@ is_macro_call ~env [Ast.Symbol "foo"]
+
+  let%test "make binds" =
+    let params = [Ast.Symbol "a"; Ast.Symbol "b"] in
+    let args = [Ast.Int 1; Ast.String "foo"] in
+    match make_binds params args with
+    | ["a", Ast.Int 1; "b", Ast.String "foo"] -> true
+    | _ -> false
+
+  let%test "make variadic binds" =
+    let params = [Ast.Symbol "a"; Ast.Symbol "&"; Ast.Symbol "b"] in
+    let args = [Ast.Int 1; Ast.String "foo"; Ast.String "bar"] in
+    match make_binds params args with
+    | ["a", Ast.Int 1; "b", Ast.List [Ast.String "foo"; Ast.String "bar"]] -> true
+    | _ -> false
 
 end)
