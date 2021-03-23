@@ -192,6 +192,14 @@ let rec concat = function
       concat @@ Ast.List (first @ second) :: rest
   | _ -> failwith "argument must be list"
 
+let car = function
+  | Ast.List (hd :: _) :: [] -> hd
+  | _ -> failwith "argument must be list"
+
+let cdr = function
+  | Ast.List (_ :: tl) :: [] -> Ast.List tl
+  | _ -> failwith "argument must be list"
+
 let fns = [
   "+", Ast.fn add;
   "-", Ast.fn sub;
@@ -218,6 +226,8 @@ let fns = [
   "swap!", Ast.fn swap;
   "cons", Ast.fn cons;
   "concat", Ast.fn concat;
+  "car", Ast.fn car;
+  "cdr", Ast.fn cdr;
 ]
 
 let make_eval env =
@@ -302,6 +312,15 @@ let%test_module "test builtin functions" = (module struct
     let lst2 = Ast.List [Ast.Int 3; Ast.Int 4] in
     match concat [lst1; lst2] with
     | Ast.List [Ast.Int 1; Ast.Int 2; Ast.Int 3; Ast.Int 4] -> true
+    | _ -> false
+
+  let%test "(car '(1 2 3))" =
+    car [Ast.List [Ast.Int 1; Ast.Int 2; Ast.Int 3]]
+    |> is_int 1
+
+  let%test "(cdr '(1 2 3))" =
+    match cdr [Ast.List [Ast.Int 1; Ast.Int 2; Ast.Int 3]] with
+    | Ast.List [Ast.Int 2; Ast.Int 3] -> true
     | _ -> false
 
 end)
