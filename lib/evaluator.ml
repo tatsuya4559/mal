@@ -42,6 +42,28 @@ let is_macro_call ~env = function
       | _ -> false)
   | _ -> false
 
+(** This function takes arguments ast and env. It calls is_macro_call
+    with ast and env and loops while that condition is true. Inside the
+    loop, the first element of the ast list (a symbol), is looked up in
+    the environment to get the macro function. This macro function is then
+    called/applied with the rest of the ast elements (2nd through the last)
+    as arguments. The return value of the macro call becomes the new value
+    of ast. When the loop completes because ast no longer represents a macro
+    call, the current value of ast is returned. *)
+let macroexpand ~env ast =
+  let rec loop ast =
+    match ast with
+    | Ast.List (Ast.Symbol sym :: rest) -> (
+        match Env.get env sym with
+        | Some Ast.Fn { is_macro; body } ->
+            if is_macro then loop (body rest)
+            else ast
+        | _ -> ast
+      )
+    | _ -> ast
+  in
+  loop ast
+
 let rec eval_ast ~env ast =
   match ast with
   | Ast.Symbol x ->
@@ -63,6 +85,7 @@ let rec eval_ast ~env ast =
  *   > 50000005000000
  *)
 and eval ~env ast =
+  let ast = macroexpand ~env ast in
   match ast with
   | Ast.List [] -> ast
   | Ast.List (Ast.Symbol "def!" :: tl) ->
@@ -83,6 +106,8 @@ and eval ~env ast =
       quasiquote ast
   | Ast.List (Ast.Symbol "quasiquote" :: ast :: _) ->
       eval ~env (quasiquote ast)
+  | Ast.List (Ast.Symbol "macroexpand" :: ast :: _) ->
+      macroexpand ~env ast
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
