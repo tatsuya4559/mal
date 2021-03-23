@@ -3,10 +3,28 @@
   (fn* (fname args body)
        `(def! ~fname (fn* ~args ~body))))
 
+; or
+; and
+; reduce
+; map
 (defun! not (x)
   (if x false true))
+
+(defun! filter (f xs)
+  (if (empty? xs) '()
+    (if (f (car xs))
+      (cons (car xs) (filter f (cdr xs)))
+      (filter f (cdr xs)))))
 
 (defun! nth (lst n)
   (if (= n 0)
     (car lst)
     (nth (cdr lst) (- n 1))))
+
+; todo else
+(defmacro! cond
+  (fn* (& xs)
+       (if (> (count xs) 0)
+         (let* (clause (car xs))
+           (list 'if (car clause) (if (> (count clause) 1) (nth clause 1) nil)
+                                  (cons 'cond (cdr xs)))))))
