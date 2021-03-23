@@ -1,12 +1,10 @@
 ; vim: ft=scheme
 (defmacro! defun!
   (fn* (fname args body)
-       `(def! ~fname (fn* ~args ~body))))
+    `(def! ~fname (fn* ~args ~body))))
 
-; or
-; and
 (defun! not (x) (if x false true))
-(defun! true? (x) x)
+(defun! true? (x) (not (not x)))
 (defun! false? (x) (not x))
 (defun! nil? (x) (= x nil))
 
@@ -17,10 +15,10 @@
 
 (defmacro! cond
   (fn* (& xs)
-       (if (> (count xs) 0)
-         (let* (clause (car xs))
-           (list 'if (car clause) (if (> (count clause) 1) (nth clause 1) nil)
-                                  (cons 'cond (cdr xs)))))))
+    (if (> (count xs) 0)
+      (let* (clause (car xs))
+        (list 'if (car clause) (if (> (count clause) 1) (nth clause 1) nil)
+                               (cons 'cond (cdr xs)))))))
 
 (defun! filter (f xs)
   (cond ((empty? xs) '())
@@ -36,3 +34,16 @@
   (if (empty? xs)
     accum
     (reduce f (f accum (car xs)) (cdr xs))))
+
+(defmacro! and
+  (fn* (& xs)
+    (reduce (fn* (acc el) (list 'if acc el false)) true xs)))
+
+(defmacro! or
+  (fn* (& xs)
+    (reduce (fn* (acc el) (list 'if acc true el)) false xs)))
+
+(defun! flatten (xs)
+  (cond ((empty? xs) '())
+        ((not (list? xs)) (list xs))
+        (true (concat (flatten (car xs)) (flatten (cdr xs))))))
