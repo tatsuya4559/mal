@@ -6,9 +6,12 @@
 ; or
 ; and
 ; reduce
-; map
 (defun! not (x)
   (if x false true))
+
+(defun! true? (x) x)
+(defun! false? (x) (not x))
+(defun! nil? (x) (= x nil))
 
 (defun! filter (f xs)
   (if (empty? xs)

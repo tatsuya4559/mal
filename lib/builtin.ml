@@ -200,6 +200,13 @@ let cdr = function
   | Ast.List (_ :: tl) :: [] -> Ast.List tl
   | _ -> failwith "argument must be list"
 
+(** takes a single argument and returns true (mal true value) if the
+    argument is a symbol (mal symbol value). *)
+let is_symbol = function
+  | [Ast.Symbol _] -> Ast.Bool true
+  | [_] -> Ast.Bool false
+  | _ -> failwith "wrong number of arguments"
+
 let fns = [
   "+", Ast.fn add;
   "-", Ast.fn sub;
@@ -228,6 +235,7 @@ let fns = [
   "concat", Ast.fn concat;
   "car", Ast.fn car;
   "cdr", Ast.fn cdr;
+  "symbol?", Ast.fn is_symbol;
 ]
 
 let make_eval env =
