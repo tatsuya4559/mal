@@ -11,10 +11,16 @@
   (if x false true))
 
 (defun! filter (f xs)
-  (if (empty? xs) '()
+  (if (empty? xs)
+    '()
     (if (f (car xs))
       (cons (car xs) (filter f (cdr xs)))
       (filter f (cdr xs)))))
+
+(defun! map (f xs)
+  (if (empty? xs)
+    '()
+    (cons (f (car xs)) (map f (cdr xs)))))
 
 (defun! nth (lst n)
   (if (= n 0)
