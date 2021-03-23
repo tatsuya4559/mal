@@ -5,35 +5,34 @@
 
 ; or
 ; and
-; reduce
-(defun! not (x)
-  (if x false true))
-
+(defun! not (x) (if x false true))
 (defun! true? (x) x)
 (defun! false? (x) (not x))
 (defun! nil? (x) (= x nil))
-
-(defun! filter (f xs)
-  (if (empty? xs)
-    '()
-    (if (f (car xs))
-      (cons (car xs) (filter f (cdr xs)))
-      (filter f (cdr xs)))))
-
-(defun! map (f xs)
-  (if (empty? xs)
-    '()
-    (cons (f (car xs)) (map f (cdr xs)))))
 
 (defun! nth (lst n)
   (if (= n 0)
     (car lst)
     (nth (cdr lst) (- n 1))))
 
-; todo else
 (defmacro! cond
   (fn* (& xs)
        (if (> (count xs) 0)
          (let* (clause (car xs))
            (list 'if (car clause) (if (> (count clause) 1) (nth clause 1) nil)
                                   (cons 'cond (cdr xs)))))))
+
+(defun! filter (f xs)
+  (cond ((empty? xs) '())
+        ((f (car xs)) (cons (car xs) (filter f (cdr xs))))
+        (true (filter f (cdr xs)))))
+
+(defun! map (f xs)
+  (if (empty? xs)
+    '()
+    (cons (f (car xs)) (map f (cdr xs)))))
+
+(defun! reduce (f accum xs)
+  (if (empty? xs)
+    accum
+    (reduce f (f accum (car xs)) (cdr xs))))
