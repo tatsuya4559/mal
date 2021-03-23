@@ -47,3 +47,6 @@
   (cond ((empty? xs) '())
         ((not (list? xs)) (list xs))
         (true (concat (flatten (car xs)) (flatten (cdr xs))))))
+
+(defun! apply (f & args)
+  (eval (cons f (flatten args))))
