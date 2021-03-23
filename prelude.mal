@@ -1,3 +1,12 @@
 ; vim: ft=scheme
-(def! not (fn* (x) (if x false true)))
-(def! nth (fn* (lst n) (if (= n 0) (car lst) (nth (cdr lst) (- n 1)))))
+(defmacro! defun!
+  (fn* (fname args body)
+       `(def! ~fname (fn* ~args ~body))))
+
+(defun! not (x)
+  (if x false true))
+
+(defun! nth (lst n)
+  (if (= n 0)
+    (car lst)
+    (nth (cdr lst) (- n 1))))
