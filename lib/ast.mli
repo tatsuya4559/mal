@@ -9,3 +9,5 @@ type t =
   | Atom of t ref
 
 val fn : (t list -> t) -> t
+
+exception Mal_exception of t

@@ -9,3 +9,5 @@ type t =
   | Atom of t ref
 
 let fn body = Fn { is_macro = false; body }
+
+exception Mal_exception of t

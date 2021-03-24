@@ -28,7 +28,10 @@ let rep ~env x =
   try
     x |> read |> eval ~env |> print |> print_endline;
     ()
-  with Failure msg -> fprintf stderr "Error: %s\n%!" msg; ()
+  with
+  | Failure msg -> fprintf stderr "Syntax Error: %s\n%!" msg; ()
+  | Ast.Mal_exception exn ->
+      fprintf stderr "Mal Error: %s\n%!" (Printer.print_str exn); ()
 
 let set_argv env argv =
   let argv = Array.to_list argv

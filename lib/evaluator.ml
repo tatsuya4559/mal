@@ -108,6 +108,8 @@ and eval ~env ast =
       eval_if ~env tl
   | Ast.List (Ast.Symbol "fn*" :: tl) ->
       eval_fn ~env tl
+  | Ast.List (Ast.Symbol "try*" :: tl) ->
+      eval_try ~env tl
   | Ast.List (Ast.Symbol "quote" :: ast :: _) ->
       ast (* just return argument *)
   | Ast.List (Ast.Symbol "quasiquoteexpand" :: ast :: _) ->
@@ -198,6 +200,17 @@ and eval_fn ~env = function
       in
       Ast.fn closure
   | _ -> failwith "syntax: use of 'fn*'"
+
+(** try* special form *)
+and eval_try ~env = function
+  | expr :: Ast.List [Ast.Symbol "catch*"; Ast.Symbol sym; handler] :: [] -> (
+      try eval ~env expr with
+      | Ast.Mal_exception exn ->
+          let binds = [sym, exn] in
+          let enclosed_env = Env.enclose env ~binds in
+          eval ~env:enclosed_env handler
+    )
+  | _ -> failwith "syntax: use of try*/catch*"
 
 
 let%test_module "test evaluator" = (module struct

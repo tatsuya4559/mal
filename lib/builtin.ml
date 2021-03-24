@@ -207,6 +207,10 @@ let is_symbol = function
   | [_] -> Ast.Bool false
   | _ -> failwith "wrong number of arguments"
 
+let throw = function
+  | exn :: [] -> raise (Ast.Mal_exception exn)
+  | _ -> failwith "wrong number of arguments"
+
 let fns = [
   "+", Ast.fn add;
   "-", Ast.fn sub;
@@ -236,6 +240,7 @@ let fns = [
   "car", Ast.fn car;
   "cdr", Ast.fn cdr;
   "symbol?", Ast.fn is_symbol;
+  "throw", Ast.fn throw;
 ]
 
 let make_eval env =
@@ -329,6 +334,11 @@ let%test_module "test builtin functions" = (module struct
   let%test "(cdr '(1 2 3))" =
     match cdr [Ast.List [Ast.Int 1; Ast.Int 2; Ast.Int 3]] with
     | Ast.List [Ast.Int 2; Ast.Int 3] -> true
+    | _ -> false
+
+  let%test "(throw not-found)" =
+    try throw [Ast.Symbol "not-found"] with
+    | Ast.Mal_exception (Ast.Symbol "not-found") -> true
     | _ -> false
 
 end)
