@@ -14,7 +14,7 @@ let rec get t key =
       get outer key
 
 let set t key value =
-  let store = Store.update key (fun _ -> Some(value)) t.store in
+  let store = Store.update key (fun _ -> Some value) t.store in
   t.store <- store
 
 let make ?(binds=[]) () =
