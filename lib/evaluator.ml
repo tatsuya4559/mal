@@ -31,8 +31,7 @@ let rec quasiquote = function
       | Ast.Symbol "unquote" :: second :: _ -> second
       | Ast.List (Ast.Symbol "splice-unquote" :: second :: _) :: rest ->
           Ast.List [Ast.Symbol "concat"; second; (loop rest)]
-      | first :: rest ->
-          Ast.List [Ast.Symbol "cons"; (quasiquote first); (loop rest)]
+      | first :: rest -> Ast.List [Ast.Symbol "cons"; (quasiquote first); (loop rest)]
     in
     loop lst
   | (Ast.Symbol _) as ast-> Ast.List [Ast.Symbol "quote"; ast]
@@ -77,8 +76,7 @@ let rec eval_ast ~env ast =
     (match Env.get env x with
     | None -> failwith (sprintf "%s not found" x)
     | Some x -> x)
-  | Ast.List lst ->
-      Ast.List (List.map (eval ~env) lst)
+  | Ast.List lst -> Ast.List (List.map (eval ~env) lst)
   | _ -> ast
 
 (* I don't have to impl tail call optimization because I'm using OCaml.
@@ -95,28 +93,17 @@ and eval ~env ast =
   let ast = macroexpand ~env ast in
   match ast with
   | Ast.List [] -> ast
-  | Ast.List (Ast.Symbol "def!" :: tl) ->
-      eval_def ~env tl
-  | Ast.List (Ast.Symbol "defmacro!" :: tl) ->
-      eval_defmacro ~env tl
-  | Ast.List (Ast.Symbol "let*" :: tl) ->
-      eval_let ~env tl
-  | Ast.List (Ast.Symbol "do" :: tl) ->
-      eval_do ~env tl
-  | Ast.List (Ast.Symbol "if" :: tl) ->
-      eval_if ~env tl
-  | Ast.List (Ast.Symbol "fn*" :: tl) ->
-      eval_fn ~env tl
-  | Ast.List (Ast.Symbol "try*" :: tl) ->
-      eval_try ~env tl
-  | Ast.List (Ast.Symbol "quote" :: ast :: _) ->
-      ast (* just return argument *)
-  | Ast.List (Ast.Symbol "quasiquoteexpand" :: ast :: _) ->
-      quasiquote ast
-  | Ast.List (Ast.Symbol "quasiquote" :: ast :: _) ->
-      eval ~env (quasiquote ast)
-  | Ast.List (Ast.Symbol "macroexpand" :: ast :: _) ->
-      macroexpand ~env ast
+  | Ast.List (Ast.Symbol "def!" :: tl) -> eval_def ~env tl
+  | Ast.List (Ast.Symbol "defmacro!" :: tl) -> eval_defmacro ~env tl
+  | Ast.List (Ast.Symbol "let*" :: tl) -> eval_let ~env tl
+  | Ast.List (Ast.Symbol "do" :: tl) -> eval_do ~env tl
+  | Ast.List (Ast.Symbol "if" :: tl) -> eval_if ~env tl
+  | Ast.List (Ast.Symbol "fn*" :: tl) -> eval_fn ~env tl
+  | Ast.List (Ast.Symbol "try*" :: tl) -> eval_try ~env tl
+  | Ast.List (Ast.Symbol "quote" :: ast :: _) -> ast (* just return argument *)
+  | Ast.List (Ast.Symbol "quasiquoteexpand" :: ast :: _) -> quasiquote ast
+  | Ast.List (Ast.Symbol "quasiquote" :: ast :: _) -> eval ~env (quasiquote ast)
+  | Ast.List (Ast.Symbol "macroexpand" :: ast :: _) -> macroexpand ~env ast
   | Ast.List _ ->
     (match eval_ast ~env ast with
     | Ast.List (fn :: args) -> apply fn args
