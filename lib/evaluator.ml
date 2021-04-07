@@ -1,4 +1,3 @@
-open Core
 open Printf
 
 let apply fn args =
@@ -79,7 +78,7 @@ let rec eval_ast ~env ast =
     | None -> failwith (sprintf "%s not found" x)
     | Some x -> x)
   | Ast.List lst ->
-      Ast.List (List.map lst ~f:(eval ~env))
+      Ast.List (List.map (eval ~env) lst)
   | _ -> ast
 
 (* I don't have to impl tail call optimization because I'm using OCaml.

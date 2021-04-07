@@ -1,10 +1,12 @@
 open Printf
 
 let escape s =
-  let open Core in
-  String.substr_replace_all ~pattern:{|\|} ~with_:{|\\|} s
-  |> String.substr_replace_all ~pattern:"\n" ~with_:{|\n|}
-  |> String.substr_replace_all ~pattern:{|"|} ~with_:{|\"|}
+  let open Batteries in
+  String.replace_chars (function
+    | '\\' -> {|\\|}
+    | '\n' -> {|\n|}
+    | '"' -> {|\"|}
+    | x -> String.of_char x) s
 
 let%test _ =
   let got = escape {|backslash:\,linefeed:

@@ -1,4 +1,4 @@
-open Core
+open Printf
 open Mal
 
 let read s =
@@ -20,11 +20,10 @@ let setup_env () =
   (* use env to define eval function *)
   Env.set env "eval" (Builtin.make_eval env);
   (* load predefined functions *)
-  List.iter ~f:(fun x -> ignore(read x |> eval ~env)) prelude;
+  List.iter (fun x -> ignore(read x |> eval ~env)) prelude;
   env
 
 let rep ~env x =
-  let open Out_channel in
   try
     x |> read |> eval ~env |> print |> print_endline;
     ()
@@ -35,26 +34,24 @@ let rep ~env x =
 
 let set_argv env argv =
   let argv = Array.to_list argv
-    |> List.map ~f:(fun x -> Ast.String x)
+    |> List.map (fun x -> Ast.String x)
   in
   Env.set env "*ARGV*" (Ast.List argv);
   ()
 
 (* main *)
 let _ =
-  let open In_channel in
-  let open Out_channel in
   let env = setup_env () in
   let rec loop () =
     printf "(mal)> %!"; (* %! for flush before readline *)
-    input_line_exn stdin |> rep ~env;
+    input_line stdin |> rep ~env;
     loop ()
   in
   try
-    let argv = Sys.get_argv () in
+    let argv = Sys.argv in
     if Array.length argv > 1 then begin
       let filename = argv.(1) in
-      set_argv env (Array.subo argv ~pos:2);
+      set_argv env (Array.sub argv 2 ((Array.length argv) - 2));
       sprintf {|(load-file "%s")|} filename
       |> rep ~env;
     end else begin

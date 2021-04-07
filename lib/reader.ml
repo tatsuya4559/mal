@@ -1,5 +1,3 @@
-open Core
-
 (** state of lexer *)
 type t = {
   tokens: string array;
@@ -27,21 +25,23 @@ let rex = Pcre.regexp {|[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\
 
 (** tokenize takes a single string and return an array of all the tokens (strings) in it. *)
 let tokenize s =
+  let open Batteries in
   Pcre.extract_all ~rex s
-  |> Array.map ~f:(fun x -> x.(1))
-  |> Array.filter ~f:(fun x -> not (String.is_prefix ~prefix:";" x)) (* remove comment *)
-  |> fun x -> Array.sub x ~pos:0 ~len:(Array.length x - 1) (* remove trailing empty string *)
+  |> Array.map (fun x -> x.(1))
+  |> Array.filter (fun x -> not (String.starts_with x ";")) (* remove comment *)
+  |> fun x -> Array.sub x 0 (Array.length x - 1) (* remove trailing empty string *)
 
 let is_numeric s =
-  try ignore(Int.of_string s); true
+  try ignore(int_of_string s); true
   with Failure _ -> false
 
 let%test _ = is_numeric "12"
 let%test _ = not (is_numeric "foo")
 
 let is_string s =
-  String.is_prefix s ~prefix:"\""
-  && String.is_suffix s ~suffix:"\""
+  let open Batteries in
+  String.starts_with s "\""
+  && String.ends_with s "\""
 
 let%test _ = is_string {|"foo"|}
 let%test _ = not (is_string {|"foo|})
@@ -49,10 +49,11 @@ let%test _ = not (is_string {|foo"|})
 let%test _ = not (is_string {|foo|})
 
 let unescape s =
-  String.strip ~drop:(fun x -> Char.(x = '"')) s
-  |> String.substr_replace_all ~pattern:{|\"|} ~with_:{|"|}
-  |> String.substr_replace_all ~pattern:{|\n|} ~with_:"\n"
-  |> String.substr_replace_all ~pattern:{|\\|} ~with_:{|\|}
+  let open Batteries in
+  let s = String.strip ~chars:{|"|} s in
+  let s = String.nreplace ~str:s ~sub:{|\"|} ~by:{|"|} in
+  let s = String.nreplace ~str:s ~sub:{|\n|} ~by:"\n" in
+  String.nreplace ~str:s ~sub:{|\\|} ~by:{|\|}
 
 (** look at the contents of the token and return the appropriate scalar
     (simple/single) data type value. *)
@@ -72,7 +73,7 @@ let rec read_atom t =
   | Some "~" -> Ast.List [Ast.Symbol "unquote"; read_form t]
   (* a reader macro ~@ which will serve as a short form for splice-unquote. *)
   | Some "~@" -> Ast.List [Ast.Symbol "splice-unquote"; read_form t]
-  | Some x when is_numeric x -> Ast.Int (Int.of_string x)
+  | Some x when is_numeric x -> Ast.Int (int_of_string x)
   | Some x when is_string x -> Ast.String (unescape x)
   | Some x -> Ast.Symbol x
 
@@ -98,6 +99,6 @@ and read_form t =
 (** tokenize a given string and then convert to Ast.t. *)
 let read_str str =
   let tokens = tokenize str in
-  if Array.is_empty tokens then Ast.Nil else
+  if Array.length tokens = 0 then Ast.Nil else
   let t = { tokens; curr_position = 0 } in
   read_form t

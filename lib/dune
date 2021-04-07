@@ -2,4 +2,4 @@
   (name mal)
   (inline_tests)
   (preprocess (pps ppx_inline_test))
-  (libraries core pcre))
+  (libraries batteries pcre))

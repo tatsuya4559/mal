@@ -1,39 +1,39 @@
-open Core
+open Printf
 
 let add ast_list =
-  let sum = List.fold ast_list ~init:0 ~f:(fun acc ast ->
+  let sum = List.fold_left (fun acc ast ->
     match ast with
     | Ast.Int x -> acc + x
-    | _ -> failwith "not int" )
+    | _ -> failwith "not int" ) 0 ast_list
   in
   Ast.Int sum
 
 let sub = function
   | [] -> failwith "no operand"
   | Ast.Int init :: tl ->
-    let diff = List.fold tl ~init ~f:(fun acc ast ->
+    let diff = List.fold_left (fun acc ast ->
       match ast with
       | Ast.Int x -> acc - x
-      | _ -> failwith "not int" )
+      | _ -> failwith "not int" ) init tl
     in
     Ast.Int diff
   | _ -> failwith "first argument is not a int"
 
 let mul ast_list =
-  let product = List.fold ast_list ~init:1 ~f:(fun acc ast ->
+  let product = List.fold_left (fun acc ast ->
     match ast with
     | Ast.Int x -> acc * x
-    | _ -> failwith "not int" )
+    | _ -> failwith "not int" ) 1 ast_list
   in
   Ast.Int product
 
 let div = function
   | [] -> failwith "no operand"
   | Ast.Int init :: tl ->
-    let quotient = List.fold tl ~init ~f:(fun acc ast ->
+    let quotient = List.fold_left (fun acc ast ->
       match ast with
       | Ast.Int x -> acc / x
-      | _ -> failwith "not int" )
+      | _ -> failwith "not int" ) init tl
     in
     Ast.Int quotient
   | _ -> failwith "first argument is not a int"
@@ -67,15 +67,15 @@ let count = function
 let equal args =
   let rec _equal = function
     | Ast.Nil :: Ast.Nil :: _ -> true
-    | Ast.Bool a :: Ast.Bool b :: _ -> Bool.(a = b)
-    | Ast.String a :: Ast.String b :: _ -> String.(a = b)
+    | Ast.Bool a :: Ast.Bool b :: _ -> a = b
+    | Ast.String a :: Ast.String b :: _ -> a = b
     | Ast.Int a :: Ast.Int b :: _ -> a = b
     | Ast.List a :: Ast.List b :: _ ->
         if List.length a <> List.length b then
           false
         else
           (* cannot raise exn because lengths have been checked *)
-          List.for_all2_exn a b ~f:(fun x y -> _equal [x; y])
+          List.for_all2 (fun x y -> _equal [x; y]) a b
     | Ast.Fn _ :: Ast.Fn _ :: _ -> failwith "cannot compare function value"
     | _ -> false
   in
@@ -110,22 +110,20 @@ let gte args =
   Ast.Bool (_gte args)
 
 let prn ast_list =
-  let open Out_channel in
-  List.map ast_list ~f:(fun x -> Printer.print_str x)
-  |> String.concat ~sep:" "
+  List.map (fun x -> Printer.print_str x) ast_list
+  |> String.concat " "
   |> printf "%s%!";
   Ast.Nil
 
 let println ast_list =
-  let open Out_channel in
-  List.map ast_list ~f:(fun x -> Printer.print_str ~readably:false x)
-  |> String.concat ~sep:" "
+  List.map (fun x -> Printer.print_str ~readably:false x) ast_list
+  |> String.concat " "
   |> printf "%s%!";
   Ast.Nil
 
 let str ast_list =
-  let s = List.map ast_list ~f:(fun x -> Printer.print_str x)
-  |> String.concat ~sep:" " in
+  let s = List.map (fun x -> Printer.print_str x) ast_list
+  |> String.concat " " in
   Ast.String s
 
 (** this function just exposes the read_str function from the reader. *)
@@ -137,8 +135,7 @@ let read_string = function
     the file as a string. *)
 let slurp = function
   | Ast.String filename :: _ ->
-      let open In_channel in
-      Ast.String (read_all filename)
+      Ast.String (Util.File.read_all filename)
   | _ -> failwith "argument must be type of string"
 
 (** Takes a Mal value and returns a new atom which points to that Mal value. *)
