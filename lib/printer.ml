@@ -1,7 +1,7 @@
-open Core
 open Printf
 
 let escape s =
+  let open Core in
   String.substr_replace_all ~pattern:{|\|} ~with_:{|\\|} s
   |> String.substr_replace_all ~pattern:"\n" ~with_:{|\n|}
   |> String.substr_replace_all ~pattern:{|"|} ~with_:{|\"|}
@@ -10,7 +10,7 @@ let%test _ =
   let got = escape {|backslash:\,linefeed:
 ,doublequote:"|}
   in
-  String.(got = {|backslash:\\,linefeed:\n,doublequote:\"|})
+  got = {|backslash:\\,linefeed:\n,doublequote:\"|}
 
 let rec print_str ?(readably=true) = function
   | Ast.Symbol x -> x
@@ -20,7 +20,7 @@ let rec print_str ?(readably=true) = function
   | Ast.Nil -> ""
   | Ast.Fn _ -> "<function>"
   | Ast.List lst ->
-      List.map lst ~f:(fun x -> print_str x)
-      |> String.concat ~sep:" "
+      List.map (fun x -> print_str x) lst
+      |> String.concat " "
       |> sprintf "(%s)"
   | Ast.Atom ast -> print_str !ast
