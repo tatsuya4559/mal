@@ -7,6 +7,7 @@ type t =
   | Nil
   | Fn of { is_macro: bool; body: (t list -> t) }
   | Atom of t ref
+  | Keyword of string
 
 val fn : (t list -> t) -> t
 

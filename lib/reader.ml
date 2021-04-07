@@ -48,6 +48,9 @@ let%test _ = not (is_string {|"foo|})
 let%test _ = not (is_string {|foo"|})
 let%test _ = not (is_string {|foo|})
 
+let is_keyword s =
+  BatString.starts_with s ":"
+
 let unescape s =
   let open Batteries in
   let s = String.strip ~chars:{|"|} s in
@@ -75,6 +78,7 @@ let rec read_atom t =
   | Some "~@" -> Ast.List [Ast.Symbol "splice-unquote"; read_form t]
   | Some x when is_numeric x -> Ast.Int (int_of_string x)
   | Some x when is_string x -> Ast.String (unescape x)
+  | Some x when is_keyword x -> Ast.Keyword x
   | Some x -> Ast.Symbol x
 
 (** repeatedly call read_form with the lexer object until it encounters

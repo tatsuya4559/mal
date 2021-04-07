@@ -26,3 +26,4 @@ let rec print_str ?(readably=true) = function
       |> String.concat " "
       |> sprintf "(%s)"
   | Ast.Atom ast -> print_str !ast
+  | Ast.Keyword x -> x
