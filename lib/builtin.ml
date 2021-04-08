@@ -208,6 +208,34 @@ let throw = function
   | exn :: [] -> raise (Ast.Mal_exception exn)
   | _ -> failwith "wrong number of arguments"
 
+(** takes a variable but even number of arguments and returns a new mal
+    hash-map value with keys from the odd arguments and values from the even
+    arguments respectively. This is basically the functional form of the {}
+    reader literal syntax. *)
+let hash_map args =
+  let rec hash_map' hashmap = function
+    | [] -> hashmap
+    | _ :: [] -> failwith "wrong number of arguments"
+    | Ast.List _ :: _ -> failwith "cannot use list as hashmap key"
+    | Ast.Nil :: _ -> failwith "cannot use nil as hashmap key"
+    | Ast.Fn _ :: _ -> failwith "cannot use function as hashmap key"
+    | Ast.Atom _ :: _ -> failwith "cannot use atom as hashmap key"
+    | Ast.Hash_map _ :: _ -> failwith "cannot use hashmap as hashmap key"
+    | ((Ast.Bool _) as key) :: value :: tl
+    | ((Ast.Int _) as key) :: value :: tl
+    | ((Ast.String _) as key) :: value :: tl
+    | ((Ast.Symbol _) as key) :: value :: tl
+    | ((Ast.Keyword _) as key) :: value :: tl -> Hashtbl.add hashmap key value; hash_map' hashmap tl
+  in
+  let size = (List.length args) / 2 in
+  Ast.Hash_map (hash_map' (Hashtbl.create size) args)
+
+(** takes a single argument and returns true (mal true value) if the
+    argument is a hash-map, otherwise returns false (mal false value). *)
+let is_hash_map = function
+  | Ast.Hash_map _ :: [] -> Ast.Bool true
+  | _ -> Ast.Bool false
+
 let fns = [
   "+", Ast.fn add;
   "-", Ast.fn sub;
@@ -238,6 +266,8 @@ let fns = [
   "cdr", Ast.fn cdr;
   "symbol?", Ast.fn is_symbol;
   "throw", Ast.fn throw;
+  "hash-map", Ast.fn hash_map;
+  "map?", Ast.fn is_hash_map;
 ]
 
 let make_eval env =

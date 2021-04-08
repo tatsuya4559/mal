@@ -77,6 +77,9 @@ let rec eval_ast ~env ast =
     | None -> failwith (sprintf "%s not found" x)
     | Some x -> x)
   | Ast.List lst -> Ast.List (List.map (eval ~env) lst)
+  | Ast.Hash_map hashmap ->
+      Hashtbl.filter_map_inplace (fun _ v -> Some (eval ~env v)) hashmap;
+      Ast.Hash_map (hashmap)
   | _ -> ast
 
 (* I don't have to impl tail call optimization because I'm using OCaml.

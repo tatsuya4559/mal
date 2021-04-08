@@ -8,7 +8,7 @@ type t =
   | Fn of { is_macro: bool; body: (t list -> t) }
   | Atom of t ref
   | Keyword of string
-  | Hash_map of (string, t) Hashtbl.t
+  | Hash_map of (t, t) Hashtbl.t
 
 val fn : (t list -> t) -> t
 

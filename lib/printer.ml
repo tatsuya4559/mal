@@ -29,7 +29,7 @@ let rec print_str ?(readably=true) = function
   | Ast.Keyword x -> x
   | Ast.Hash_map x ->
       let content = Hashtbl.fold (fun key value acc ->
-        (sprintf "%s %s" key (print_str value)) :: acc)
+        (sprintf "%s %s" (print_str key) (print_str value)) :: acc)
         x []
       in
       "{" ^ (String.concat ", " content) ^ "}"

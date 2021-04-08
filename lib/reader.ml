@@ -99,8 +99,12 @@ and read_hashmap t =
     | _ ->
         let key =
           match read_form t with
-          | Ast.String k | Ast.Symbol k | Ast.Keyword k -> k
-          | _ -> failwith "string or symbol or keyword can be used as hashmap key"
+          | Ast.List _ -> failwith "cannot use list as a hashmap key"
+          | Ast.Nil -> failwith "cannot use nil as a hashmap key"
+          | Ast.Fn _ -> failwith "cannot use function as a hashmap key"
+          | Ast.Atom _ -> failwith "cannot use atom as a hashmap key"
+          | Ast.Hash_map _ -> failwith "cannot use hashmap as a hashmap key"
+          | Ast.Int _ | Ast.String _ | Ast.Symbol _ | Ast.Bool _ | Ast.Keyword _ as k -> k
         in
         let value = read_form t in
         Hashtbl.add hashmap key value;
