@@ -92,12 +92,30 @@ and read_list t =
   ignore(next t); (* consume "(" *)
   Ast.List (List.rev (read_element t []))
 
+and read_hashmap t =
+  let rec read_element t hashmap =
+    match peek t with
+    | Some "}" -> ignore(next t); hashmap
+    | _ ->
+        let key =
+          match read_form t with
+          | Ast.String k | Ast.Symbol k | Ast.Keyword k -> k
+          | _ -> failwith "string or symbol or keyword can be used as hashmap key"
+        in
+        let value = read_form t in
+        Hashtbl.add hashmap key value;
+        read_element t hashmap
+  in
+  ignore(next t);
+  Ast.Hash_map (read_element t (Hashtbl.create 1))
+
 (** peek at the first token in the lexer object and switch on the first
     character of that token. *)
 and read_form t =
   match peek t with
   | None -> failwith "got EOF while parsing"
   | Some "(" -> read_list t
+  | Some "{" -> read_hashmap t
   | Some _ -> read_atom t
 
 (** tokenize a given string and then convert to Ast.t. *)

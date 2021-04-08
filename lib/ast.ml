@@ -8,6 +8,7 @@ type t =
   | Fn of { is_macro: bool; body: (t list -> t) }
   | Atom of t ref
   | Keyword of string
+  | Hash_map of (string, t) Hashtbl.t
 
 let fn body = Fn { is_macro = false; body }
 
