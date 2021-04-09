@@ -6,8 +6,7 @@ type t = {
 
 (** next returns the token at the current position and increments the position. *)
 let next ({tokens; curr_position} as t) =
-  if curr_position >= Array.length tokens
-  then None
+  if curr_position >= Array.length tokens then None
   else begin
     t.curr_position <- curr_position + 1;
     Some tokens.(curr_position)
@@ -15,8 +14,7 @@ let next ({tokens; curr_position} as t) =
 
 (** peek just returns the token at the current position. *)
 let peek {tokens; curr_position} =
-  if curr_position >= Array.length tokens
-  then None
+  if curr_position >= Array.length tokens then None
   else Some tokens.(curr_position)
 
 
@@ -29,7 +27,7 @@ let tokenize s =
   Pcre.extract_all ~rex s
   |> Array.map (fun x -> x.(1))
   |> Array.filter (fun x -> not (String.starts_with x ";")) (* remove comment *)
-  |> fun x -> Array.sub x 0 (Array.length x - 1) (* remove trailing empty string *)
+  |> fun x -> ArrayLabels.sub x ~pos:0 ~len:(Array.length x - 1) (* remove trailing empty string *)
 
 let is_numeric s =
   try ignore(int_of_string s); true
