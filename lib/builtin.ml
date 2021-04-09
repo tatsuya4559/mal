@@ -272,6 +272,32 @@ let dissoc = function
       Ast.Hash_map hashmap
   | _ -> failwith "first argument must be a hashmap"
 
+(** takes a hash-map and a key and returns the value of looking up that
+    key in the hash-map. If the key is not found in the hash-map then nil is
+    returned. *)
+let get = function
+  | Ast.Hash_map hashmap :: key :: [] ->
+      Hashtbl.find_opt hashmap key |> Option.value ~default:Ast.Nil
+  | _ -> failwith "get takes a hashmap and a key"
+
+(** takes a hash-map and a key and returns true (mal true value) if the
+    key exists in the hash-map and false (mal false value) otherwise. *)
+let contains = function
+  | Ast.Hash_map hashmap :: key :: [] ->
+      Ast.Bool (Hashtbl.mem hashmap key)
+  | _ -> failwith "contains? takes a hashmap and a key"
+
+(** takes a hash-map and returns a list (mal list value) of all the keys in the hash-map. *)
+let keys = function
+  | Ast.Hash_map hashmap :: [] ->
+      Ast.List (Hashtbl.to_seq_keys hashmap |> List.of_seq)
+  | _ -> failwith "keys takes a hashmap"
+
+(** takes a hash-map and returns a list (mal list value) of all the values in the hash-map. *)
+let vals = function
+  | Ast.Hash_map hashmap :: [] ->
+      Ast.List (Hashtbl.to_seq_values hashmap |> List.of_seq)
+  | _ -> failwith "vals takes a hashmap"
 
 let fns = [
   "+", Ast.fn add;
@@ -307,6 +333,10 @@ let fns = [
   "map?", Ast.fn is_hash_map;
   "assoc", Ast.fn assoc;
   "dissoc", Ast.fn dissoc;
+  "get", Ast.fn get;
+  "contains?", Ast.fn contains;
+  "keys", Ast.fn keys;
+  "vals", Ast.fn vals;
 ]
 
 let make_eval env =
