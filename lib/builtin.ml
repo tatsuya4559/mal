@@ -236,6 +236,43 @@ let is_hash_map = function
   | Ast.Hash_map _ :: [] -> Ast.Bool true
   | _ -> Ast.Bool false
 
+(** takes a hash-map as the first argument and the remaining arguments
+    are odd/even key/value pairs to "associate" (merge) into the hash-map.
+    Note that the original hash-map is unchanged (remember, mal values are
+    immutable), and a new hash-map containing the old hash-maps key/values
+    plus the merged key/value arguments is returned. *)
+let assoc args =
+  let rec merge hashmap = function
+    | [] -> hashmap
+    | [_] -> failwith "wrong number of arguments"
+    | Ast.List _ :: _ -> failwith "cannot use list as hashmap key"
+    | Ast.Nil :: _ -> failwith "cannot use nil as hashmap key"
+    | Ast.Fn _ :: _ -> failwith "cannot use function as hashmap key"
+    | Ast.Atom _ :: _ -> failwith "cannot use atom as hashmap key"
+    | Ast.Hash_map _ :: _ -> failwith "cannot use hashmap as hashmap key"
+    | ((Ast.Bool _) as key) :: value :: tl
+    | ((Ast.Int _) as key) :: value :: tl
+    | ((Ast.String _) as key) :: value :: tl
+    | ((Ast.Symbol _) as key) :: value :: tl
+    | ((Ast.Keyword _) as key) :: value :: tl ->
+        Hashtbl.add hashmap key value; merge hashmap tl
+  in
+  match args with
+  | Ast.Hash_map hashmap :: tl -> Ast.Hash_map (merge (Hashtbl.copy hashmap) tl)
+  | _ -> failwith "first argument must be a hashmap"
+
+(** takes a hash-map and a list of keys to remove from the hash-map.
+    Again, note that the original hash-map is unchanged and a new hash-map
+    with the keys removed is returned. Key arguments that do not exist in
+    the hash-map are ignored. *)
+let dissoc = function
+  | Ast.Hash_map hashmap :: keys ->
+      let hashmap = Hashtbl.copy hashmap in
+      List.iter (fun key -> Hashtbl.remove hashmap key) keys;
+      Ast.Hash_map hashmap
+  | _ -> failwith "first argument must be a hashmap"
+
+
 let fns = [
   "+", Ast.fn add;
   "-", Ast.fn sub;
@@ -268,6 +305,8 @@ let fns = [
   "throw", Ast.fn throw;
   "hash-map", Ast.fn hash_map;
   "map?", Ast.fn is_hash_map;
+  "assoc", Ast.fn assoc;
+  "dissoc", Ast.fn dissoc;
 ]
 
 let make_eval env =
