@@ -1,22 +1,35 @@
-(** state of lexer *)
-type t = {
-  tokens: string array;
-  mutable curr_position: int;
-}
+module Lexer : sig
+  (** lexer state *)
+  type t
 
-(** next returns the token at the current position and increments the position. *)
-let next ({tokens; curr_position} as t) =
-  if curr_position >= Array.length tokens then None
-  else begin
-    t.curr_position <- curr_position + 1;
-    Some tokens.(curr_position)
-  end
+  (** create new state from token array *)
+  val create : string array -> t
 
-(** peek just returns the token at the current position. *)
-let peek {tokens; curr_position} =
-  if curr_position >= Array.length tokens then None
-  else Some tokens.(curr_position)
+  (** next returns the token at the current position and increments the position. *)
+  val next : t -> string option
 
+  (** peek just returns the token at the current position. *)
+  val peek : t -> string option
+end = struct
+  type t = {
+    tokens: string array;
+    mutable curr_position: int;
+  }
+
+  let create tokens =
+    { tokens; curr_position = 0 }
+
+  let next ({tokens; curr_position} as t) =
+    if curr_position >= Array.length tokens then None
+    else begin
+      t.curr_position <- curr_position + 1;
+      Some tokens.(curr_position)
+    end
+
+  let peek {tokens; curr_position} =
+    if curr_position >= Array.length tokens then None
+    else Some tokens.(curr_position)
+end
 
 (** regular expression (PCRE) that will match all mal tokens *)
 let rex = Pcre.regexp {|[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)|}
@@ -59,7 +72,7 @@ let unescape s =
 (** look at the contents of the token and return the appropriate scalar
     (simple/single) data type value. *)
 let rec read_atom t =
-  match next t with
+  match Lexer.next t with
   | None -> assert false
   | Some "true" -> Ast.Bool true
   | Some "false" -> Ast.Bool false
@@ -83,17 +96,17 @@ let rec read_atom t =
     a ')' token (if it reach EOF before reading a ')' then that is an error). *)
 and read_list t =
   let rec read_element t acc_list =
-    match peek t with
-    | Some ")" -> ignore(next t); acc_list (* consume ")" *)
+    match Lexer.peek t with
+    | Some ")" -> ignore(Lexer.next t); acc_list (* consume ")" *)
     | _ -> read_element t ((read_form t) :: acc_list)
   in
-  ignore(next t); (* consume "(" *)
+  ignore(Lexer.next t); (* consume "(" *)
   Ast.List (List.rev (read_element t []))
 
 and read_hashmap t =
   let rec read_element t hashmap =
-    match peek t with
-    | Some "}" -> ignore(next t); hashmap
+    match Lexer.peek t with
+    | Some "}" -> ignore(Lexer.next t); hashmap
     | _ ->
         let key =
           match read_form t with
@@ -108,13 +121,13 @@ and read_hashmap t =
         Hashtbl.add hashmap key value;
         read_element t hashmap
   in
-  ignore(next t);
+  ignore(Lexer.next t);
   Ast.Hash_map (read_element t (Hashtbl.create 1))
 
 (** peek at the first token in the lexer object and switch on the first
     character of that token. *)
 and read_form t =
-  match peek t with
+  match Lexer.peek t with
   | None -> failwith "got EOF while parsing"
   | Some "(" -> read_list t
   | Some "{" -> read_hashmap t
@@ -124,5 +137,5 @@ and read_form t =
 let read_str str =
   let tokens = tokenize str in
   if Array.length tokens = 0 then Ast.Nil else
-  let t = { tokens; curr_position = 0 } in
+  let t = Lexer.create tokens in
   read_form t
