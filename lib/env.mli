@@ -10,5 +10,3 @@ val make : ?binds:(string * Ast.t) list -> unit -> t
 
 (** make a enclosed environment in given one *)
 val enclose : ?binds:(string * Ast.t) list -> t -> t
-
-val set_argv : t -> string list -> unit

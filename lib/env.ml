@@ -28,7 +28,3 @@ let enclose ?(binds=[]) t =
   let env = { store; outer = Some t } in
   List.iter (fun (key, value) -> set env key value) binds;
   env
-
-let set_argv t argv =
-  let argv = List.map (fun x -> Ast.String x) argv in
-  set t "*ARGV*" (Ast.List argv)
