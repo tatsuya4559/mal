@@ -9,3 +9,7 @@ module File = struct
       BatIO.read_all input)
 end
 
+module Strings = struct
+  let replace_all ~sub ~by s =
+    BatString.nreplace ~str:s ~sub ~by
+end

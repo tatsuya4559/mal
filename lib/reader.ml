@@ -63,11 +63,10 @@ let is_keyword s =
   BatString.starts_with s ":"
 
 let unescape s =
-  let open Batteries in
-  let s = String.strip ~chars:{|"|} s in
-  let s = String.nreplace ~str:s ~sub:{|\"|} ~by:{|"|} in
-  let s = String.nreplace ~str:s ~sub:{|\n|} ~by:"\n" in
-  String.nreplace ~str:s ~sub:{|\\|} ~by:{|\|}
+  BatString.strip ~chars:{|"|} s
+  |> Util.Strings.replace_all ~sub:{|\"|} ~by:{|"|}
+  |> Util.Strings.replace_all ~sub:{|\n|} ~by:"\n"
+  |> Util.Strings.replace_all ~sub:{|\\|} ~by:{|\|}
 
 (** look at the contents of the token and return the appropriate scalar
     (simple/single) data type value. *)
