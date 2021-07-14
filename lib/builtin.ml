@@ -135,7 +135,7 @@ let read_string = function
     the file as a string. *)
 let slurp = function
   | Ast.String filename :: _ ->
-      Ast.String (Util.File.read_all filename)
+      Ast.String (Files.read_all filename)
   | _ -> failwith "argument must be type of string"
 
 (** Takes a Mal value and returns a new atom which points to that Mal value. *)

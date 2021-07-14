@@ -9,7 +9,7 @@ let rec get t key =
   match Store.find_opt key t.store with
   | Some value -> Some value
   | None ->
-      let open Util.Option_ops in
+      let open Option_monad in
       let* outer = t.outer in
       get outer key
 

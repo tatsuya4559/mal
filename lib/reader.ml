@@ -60,13 +60,13 @@ let%test _ = not (is_string {|foo"|})
 let%test _ = not (is_string {|foo|})
 
 let is_keyword s =
-  BatString.starts_with s ":"
+  Stringutils.starts_with s ":"
 
 let unescape s =
-  BatString.strip ~chars:{|"|} s
-  |> Util.Strings.replace_all ~sub:{|\"|} ~by:{|"|}
-  |> Util.Strings.replace_all ~sub:{|\n|} ~by:"\n"
-  |> Util.Strings.replace_all ~sub:{|\\|} ~by:{|\|}
+  Stringutils.strip ~chars:{|"|} s
+  |> Stringutils.replace_all ~sub:{|\"|} ~by:{|"|}
+  |> Stringutils.replace_all ~sub:{|\n|} ~by:"\n"
+  |> Stringutils.replace_all ~sub:{|\\|} ~by:{|\|}
 
 (** look at the contents of the token and return the appropriate scalar
     (simple/single) data type value. *)
